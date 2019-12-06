@@ -9,7 +9,8 @@ import os
 Stages of generating imitation survey:
 
 1. Read interpolated lightcurve data and inflate to random redshift
-2. 
+2. Define survey duration, observational limitations and recover 'detection' days from cadence
+3. 
 
 """
 
@@ -48,5 +49,16 @@ for i in range(0, len(redshift)):
 # fig_interp_o_inflate = imsu.plotInterpolatedLightcurve(inflated_lc_o, colour = 'orange')
 # plt.show(fig_interp_c_inflate)
 # plt.show(fig_interp_o_inflate)
+
+"""
+STAGE 2 = Recover detection days for duration survey is run
+"""
+
+survey_duration = 365 # days
+cadence = 2 # days
+
+survey_timeline = np.arange(0, survey_duration, cadence)
+
+
 
 
