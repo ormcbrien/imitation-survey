@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+import random
 
 def plotLightcurve(obj_data, cyan_detlim = 19.3, orange_detlim = 18.7, showLimits = True):
 
@@ -103,3 +104,67 @@ def inflateLightcurve(obj_data, redshift, c = 3e5, H0 = 70):
 	obj_data_app = pd.DataFrame({'mjd': obj_data['mjd'], 'interp_mag': obj_data['interp_mag'] + dist_mod})
 	
 	return obj_data_app
+
+# ########################################################################################
+
+def getFractionalLoss(survey_timeline, fraction_loss):
+
+	fraction_loss = 1 - fraction_loss
+
+# 	print('survey_timeline = ', survey_timeline)
+
+	total_no_nights = len(survey_timeline)
+# 	print('total_no_nights = ', total_no_nights)
+	
+	no_nights_lost_to_fraction = int(np.round(fraction_loss * total_no_nights))
+# 	print('no_nights_lost_to_fraction = ', no_nights_lost_to_fraction)
+
+# 	ind_fraction_loss = [random.randint(np.nanmin(survey_timeline), np.nanmax(survey_timeline)) for i in range(0,no_nights_lost_to_fraction)]
+	ind_fraction_loss = np.array(sorted(random.sample(range(0, total_no_nights), no_nights_lost_to_fraction)))
+# 	print(ind_fraction_loss)
+# 	print(len(ind_fraction_loss))
+	
+# 	print('Nights to be removed = ', survey_timeline[ind_fraction_loss])
+# 	print('Nights remaining = ', survey_timeline[~ind_fraction_loss])
+	
+	survey_timeline = survey_timeline[ind_fraction_loss]
+
+	return survey_timeline
+
+# ########################################################################################
+
+def getMoonLoss(survey_timeline, moon_cycle = 28, moon_window = 3):
+
+# 	print(np.nanmin(survey_timeline), np.nanmax(survey_timeline))
+	
+	moon_timeline = np.arange(np.nanmin(survey_timeline) + moon_window, np.nanmax(survey_timeline) + moon_window, moon_cycle)
+# 	print(moon_timeline)
+	moon_timeline_lower = moon_timeline - moon_window
+	moon_timeline_upper = moon_timeline + moon_window
+# 	print(moon_timeline_lower)
+# 	print(moon_timeline_upper)
+	
+	remove_values = []
+	
+	for i in range(0, len(survey_timeline)):
+	
+		for j in range(0, len(moon_timeline)):
+			
+			if (survey_timeline[i] <= moon_timeline_upper[j]) and (survey_timeline[i] >= moon_timeline_lower[j]):
+			
+				remove_values.append(i)
+	
+	survey_timeline = np.delete(survey_timeline, remove_values)		
+# 	print(survey_timeline)
+	
+	return survey_timeline
+
+
+
+
+
+
+
+
+
+
