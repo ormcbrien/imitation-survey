@@ -11,32 +11,47 @@ Stages of setting up imitation survey:
 
 """
 
+print('')
+print('# Setting up imitation survey')
+print('#')
+print('# Stage 1 - Generating absolute magnitude kilonova lightcurve')
+
 """
 STAGE 1 = Generate absolute magnitude lightcurve
 """
 
+print('\nReading kilonova data file')
 obj_data = pd.read_csv('kilonova_data/app_AT2017gfo_co.csv')
-# print(obj_data)
 
-# fig_app = imsu.plotLightcurve(obj_data)
-# plt.show(fig_app)
+print('\nMaking apparent magnitude plot')
+fig_app = imsu.plotLightcurve(obj_data)
+plt.show(fig_app)
 
+print('\nConverting magnitudes to absolute space and outputting to file')
 obj_data_abs = imsu.getAbsoluteLightcurve(obj_data)
-obj_data_abs.to_csv('kilonova_data/abs_AT2017gfo_co.csv')
+obj_data_abs.to_csv('kilonova_data/abs_AT2017gfo_co.csv', index = False)
 # print(obj_data_abs)
 
-# fig_abs = imsu.plotLightcurve(obj_data_abs, showLimits = False)
-# plt.show(fig_abs)
+print('\nMaking absolute magnitude plot')
+fig_abs = imsu.plotLightcurve(obj_data_abs, showLimits = False)
+plt.show(fig_abs)
 
 """
 STAGE 2 = Fit spline/polynomial to lightcurve to interpolate
 """
 
+print('')
+print('# Setting up imitation survey')
+print('#')
+print('# Stage 2 - Interpolate absolute lighcurve and extrapolate to higher temporal resolution')
+
+print('\nSpline fitting lightcurves')
 interp_c, interp_o = imsu.fitLightcurve(obj_data_abs, spline_kind = 'cubic')
 
 obj_data_abs_trunc = obj_data.dropna(axis = 0, how = 'any')
 interp_mjd = np.linspace(np.nanmin(obj_data_abs_trunc['mjd']), np.nanmax(obj_data_abs_trunc['mjd']), 100)
 
+print('\nSeparating c and o band data')
 mag_interp_c = interp_c(interp_mjd)
 mag_interp_o = interp_o(interp_mjd)
 
@@ -44,7 +59,14 @@ mag_interp_o = interp_o(interp_mjd)
 # plt.plot(interp_mjd, mag_interp_o, ls = '-', color = 'orange')
 # plt.show()
 
-pd.DataFrame({'mjd': interp_mjd - np.nanmin(interp_mjd), 'interp_mag': mag_interp_c}).to_csv('kilonova_data/interpolated_lc_cyan.csv')
-pd.DataFrame({'mjd': interp_mjd - np.nanmin(interp_mjd), 'interp_mag': mag_interp_o}).to_csv('kilonova_data/interpolated_lc_orange.csv')
+print('\nOutputting c and o interpolated lightcurves to separate files')
+pd.DataFrame({'mjd': interp_mjd - np.nanmin(interp_mjd), 'interp_mag': mag_interp_c}).to_csv('kilonova_data/interpolated_lc_cyan.csv', index = False)
+pd.DataFrame({'mjd': interp_mjd - np.nanmin(interp_mjd), 'interp_mag': mag_interp_o}).to_csv('kilonova_data/interpolated_lc_orange.csv', index = False)
 
+
+print('')
+print('# Setting up imitation survey')
+print('#')
+print('# Tasks completed')
+print('# Please run generateImitationSurvey.py next')
 

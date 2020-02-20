@@ -14,55 +14,76 @@ Stages of generating imitation survey:
 
 """
 
+print('')
+print('# Generating imitation survey')
+print('#')
+print('# Stage 1 - Distribute kilonova sample across given redshift range')
+
+
 """
 STAGE 1 = 'Inflate' interpolated lightcurves to random redshift
 """
 
+print('\nReading c and o interpolated lightcurves')
 interpolated_c = pd.read_csv('kilonova_data/interpolated_lc_cyan.csv')
 interpolated_o = pd.read_csv('kilonova_data/interpolated_lc_orange.csv')
 
-fig_interp_c = imsu.plotInterpolatedLightcurve(interpolated_c, colour = 'cyan')
-fig_interp_o = imsu.plotInterpolatedLightcurve(interpolated_o, colour = 'orange')
+# fig_interp_c = imsu.plotInterpolatedLightcurve(interpolated_c, colour = 'cyan')
+# fig_interp_o = imsu.plotInterpolatedLightcurve(interpolated_o, colour = 'orange')
 
+print('\nSampling redshift range to distribute events across')
 redshift = [random.uniform(0.0, 0.014) for i in range(0,100)]
 # print(redshift)
 
+print('\nCreating directory for inflated lightcurves in c')
 if not os.path.exists('kilonova_data/inflated_lc_cyan'):
 	os.mkdir('kilonova_data/inflated_lc_cyan')
-	
+
+print('\nCreating directory for inflated lightcurves in o')
 if not os.path.exists('kilonova_data/inflated_lc_orange'):
 	os.mkdir('kilonova_data/inflated_lc_orange')
 
+print('\nInflating lightcurves to given redshift and saving in created directories')
 for i in range(0, len(redshift)):
 
 	inflated_lc_c = imsu.inflateLightcurve(interpolated_c, redshift[i])
 	inflated_lc_o = imsu.inflateLightcurve(interpolated_o, redshift[i])
 
-	inflated_lc_c.to_csv('kilonova_data/inflated_lc_cyan/kilonova_%d.csv' %i)
-	inflated_lc_o.to_csv('kilonova_data/inflated_lc_orange/kilonova_%d.csv' %i)
+	inflated_lc_c.to_csv('kilonova_data/inflated_lc_cyan/kilonova_%d.csv' %i, index = False)
+	inflated_lc_o.to_csv('kilonova_data/inflated_lc_orange/kilonova_%d.csv' %i, index = False)
 
+print('\nCreating directory to keep survey paramter information')
 if not os.path.exists('survey'):
 	os.mkdir('survey')
-	
+
+print('\nGenerating kilonova sample meta-data (kilonova number and associated redshift and explosion epoch relative to survey timeline)')
 kn_number_count = np.array([i for i in range(0, 100)])
 expl_epochs = random.sample(range(0, 365), 100)
 
-pd.DataFrame({'kn_number': kn_number_count, 'redshift': redshift, 'expl_epoch': expl_epochs}).to_csv('survey/kn_sample_data.csv')
+pd.DataFrame({'kn_number': kn_number_count, 'redshift': redshift, 'expl_epoch': expl_epochs}).to_csv('survey/kn_sample_data.csv', index = False)
 
 """
 STAGE 2 = Recover detection days for duration survey is run
 """
 
+print('')
+print('# Generating imitation survey')
+print('#')
+print('# Stage 2 - Generate survey timeline and determine observational losses')
+
+
 survey_duration = 365 # days
 cadence = 2 # days
+print('\nSetting survey duration to %f days with cadence %f days' %(survey_duration, cadence))
+survey_timeline = np.arange(0, survey_duration, cadence)
 
 weather_loss = 0.3
 tech_loss = 0.12
 
 total_fractional_loss = weather_loss + tech_loss
+print('\nSetting loss factors as %f per cent for weather loss and %f per cent for technical issues' %(weather_loss*100, tech_loss*100))
 
-survey_timeline = np.arange(0, survey_duration, cadence)
-
+print('\nConstructing illustration to show losses out of total survey timeline...')
 plt.figure(figsize = (16,6))
 plt.plot(survey_timeline, np.zeros(len(survey_timeline)), marker = 'o', ls = 'None', color = 'black', label = 'total')
 
@@ -73,18 +94,29 @@ plt.plot(survey_timeline, np.zeros(len(survey_timeline)), marker = 'o', ls = 'No
 # - moon
 # - solar conjunction
 
+print('\nRemoving epochs due to fractional loss (i.e. weather and technical faults)')
 survey_timeline = imsu.getFractionalLoss(survey_timeline, fraction_loss = total_fractional_loss)
 plt.plot(survey_timeline, np.zeros(len(survey_timeline))+1, marker = 'o', ls = 'None', color = 'blue', label = 'fractional')
 
+print('\nRemoving epochs based on proximity to the moon')
 survey_timeline = imsu.getMoonLoss(survey_timeline, moon_window = 4)
 plt.plot(survey_timeline, np.zeros(len(survey_timeline))+2, marker = 'o', ls = 'None', color = 'grey', label = 'moon')
 
-
-plt.legend(frameon = False, loc = 'center right')
+print('\nLoss plot output...')
+plt.legend(frameon = False, loc = 'upper center', ncol = 3)
+plt.yticks([])
+plt.ylim([-0.1, 2.2])
 plt.show()
 
 if not os.path.exists('survey'):
 	os.mkdir('survey')
 
-# print(survey_timeline)
-pd.DataFrame({'survey_timeline': survey_timeline}).to_csv('survey/survey_timeline.csv')
+print('\nOutputting survey timeline')
+pd.DataFrame({'survey_timeline': survey_timeline}).to_csv('survey/survey_timeline.csv', index = False)
+
+print('')
+print('# Generating imitation survey')
+print('#')
+print('# Tasks complete')
+print('# Please run generateUniverse.py next')
+
