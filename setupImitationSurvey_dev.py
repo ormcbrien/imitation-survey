@@ -49,7 +49,7 @@ print('\nSpline fitting lightcurves')
 interp_c, interp_o = imsu.fitLightcurve(obj_data_abs, spline_kind = 'cubic')
 
 obj_data_abs_trunc = obj_data.dropna(axis = 0, how = 'any')
-interp_mjd = np.linspace(np.nanmin(obj_data_abs_trunc['mjd']), np.nanmax(obj_data_abs_trunc['mjd']), 100)
+interp_mjd = np.arange(np.nanmin(obj_data_abs_trunc['mjd']), np.nanmax(obj_data_abs_trunc['mjd']), 1, dtype = int)
 
 print('\nSeparating c and o band data')
 mag_interp_c = interp_c(interp_mjd)
