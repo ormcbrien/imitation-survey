@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 import imitationSurvey as imsu
 import random
 import os
+import yaml
+
+with open('imsu_config.yaml') as f:
+	config_settings = yaml.load(f)
 
 """
 Stages of generating imitation survey:
@@ -32,7 +36,7 @@ interpolated_o = pd.read_csv('kilonova_data/interpolated_lc_orange.csv')
 # fig_interp_o = imsu.plotInterpolatedLightcurve(interpolated_o, colour = 'orange')
 
 print('\nSampling redshift range to distribute events across')
-redshift = [random.uniform(0.0, 0.014) for i in range(0,100)]
+redshift = [random.uniform(config_settings['lower_redshift'], config_settings['upper_redshift']) for i in range(0, config_settings['number_of_kilonovae'])]
 # print(redshift)
 
 print('\nCreating directory for inflated lightcurves in c')
@@ -44,7 +48,7 @@ if not os.path.exists('kilonova_data/inflated_lc_orange'):
 	os.mkdir('kilonova_data/inflated_lc_orange')
 
 print('\nInflating lightcurves to given redshift and saving in created directories')
-for i in range(0, len(redshift)):
+for i in range(0, config_settings['number_of_kilonovae']):
 
 	inflated_lc_c = imsu.inflateLightcurve(interpolated_c, redshift[i])
 	inflated_lc_o = imsu.inflateLightcurve(interpolated_o, redshift[i])
@@ -57,8 +61,8 @@ if not os.path.exists('survey'):
 	os.mkdir('survey')
 
 print('\nGenerating kilonova sample meta-data (kilonova number and associated redshift and explosion epoch relative to survey timeline)')
-kn_number_count = np.array([i for i in range(0, 100)])
-expl_epochs = random.sample(range(0, 365), 100)
+kn_number_count = np.array([i for i in range(0, config_settings['number_of_kilonovae'])])
+expl_epochs = random.sample(range(0, config_settings['survey_duration']), config_settings['number_of_kilonovae'])
 
 pd.DataFrame({'kn_number': kn_number_count, 'redshift': redshift, 'expl_epoch': expl_epochs}).to_csv('survey/kn_sample_data.csv', index = False)
 
@@ -72,13 +76,13 @@ print('#')
 print('# Stage 2 - Generate survey timeline and determine observational losses')
 
 
-survey_duration = 365 # days
-cadence = 2 # days
+survey_duration = config_settings['survey_duration'] # days
+cadence = config_settings['survey_cadence'] # days
 print('\nSetting survey duration to %f days with cadence %f days' %(survey_duration, cadence))
 survey_timeline = np.arange(0, survey_duration, cadence)
 
-weather_loss = 0.3
-tech_loss = 0.12
+weather_loss = config_settings['weather_loss']
+tech_loss = config_settings['tech_loss']
 
 total_fractional_loss = weather_loss + tech_loss
 print('\nSetting loss factors as %f per cent for weather loss and %f per cent for technical issues' %(weather_loss*100, tech_loss*100))
@@ -99,7 +103,7 @@ survey_timeline = imsu.getFractionalLoss(survey_timeline, fraction_loss = total_
 plt.plot(survey_timeline, np.zeros(len(survey_timeline))+1, marker = 'o', ls = 'None', color = 'blue', label = 'fractional')
 
 print('\nRemoving epochs based on proximity to the moon')
-survey_timeline = imsu.getMoonLoss(survey_timeline, moon_window = 4)
+survey_timeline = imsu.getMoonLoss(survey_timeline, moon_window = config_settings['moon_window'])
 plt.plot(survey_timeline, np.zeros(len(survey_timeline))+2, marker = 'o', ls = 'None', color = 'grey', label = 'moon')
 
 print('\nLoss plot output...')

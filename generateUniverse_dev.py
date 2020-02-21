@@ -5,6 +5,10 @@ import imitationSurvey as imsu
 import random
 import os
 import glob
+import yaml
+
+with open('imsu_config.yaml') as f:
+	config_settings = yaml.load(f)
 
 SMALL_SIZE = 14
 MEDIUM_SIZE = 18
@@ -41,7 +45,7 @@ STAGE 0 = See the generated universe
 
 plt.figure(figsize = (16, 8))
 
-survey_duration = 365
+survey_duration = config_settings['survey_duration']
 
 print('\nRead kilonova lightcurve directories')
 kilonova_files_c = sorted(glob.glob('kilonova_data/inflated_lc_cyan/*.csv'))

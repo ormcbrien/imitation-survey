@@ -1,0 +1,10 @@
+upper_redshift: 0.014
+lower_redshift: 0.0
+
+number_of_kilonovae: 100
+
+survey_duration: 365
+survey_cadence: 2
+weather_loss: 0.3
+tech_loss: 0.12
+moon_window: 4
