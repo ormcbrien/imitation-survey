@@ -1,10 +1,16 @@
 upper_redshift: 0.014
-lower_redshift: 0.0
+lower_redshift: 0.000
 
-number_of_kilonovae: 100
+number_of_kilonovae: 10
 
 survey_duration: 365
 survey_cadence: 2
-weather_loss: 0.3
-tech_loss: 0.12
+weather_loss: 0.13
+tech_loss: 0.2
 moon_window: 4
+
+cyan_detection_efficiency: 0.25
+
+archive_start: 0
+archive_end: 1509
+archive_do_site: 'HKO'

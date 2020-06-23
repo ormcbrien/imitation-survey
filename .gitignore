@@ -3,3 +3,4 @@ __pycache__
 survey_simulation_plan.txt
 atlas/
 atlas/*
+sandbox.py

@@ -69,4 +69,5 @@ print('# Setting up imitation survey')
 print('#')
 print('# Tasks completed')
 print('# Please run generateImitationSurvey.py next')
+print('')
 
