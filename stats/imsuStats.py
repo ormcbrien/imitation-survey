@@ -1,2 +1,0 @@
-import statsKilonovaSample
-import statsRecoveredEvents
