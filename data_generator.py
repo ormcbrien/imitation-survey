@@ -42,44 +42,80 @@ def getRedshiftBounds(shell_weights, redshift_distribution):
 
 # ========================================================================================
 
-def filterAtlasDataFrameByExplosionEpoch(full_ATLAS_df, Kilonova):
+def filterAtlasDataFrameByExplosionEpoch(full_ATLAS_df, kn, lower_fit_time_limit, upper_fit_time_limit):
 
-	lower_expl_epoch_bound = Kilonova.expl_epoch - 2.0
-	upper_expl_epoch_bound = Kilonova.expl_epoch + 15.0
+	lower_expl_epoch_bound = kn.expl_epoch + lower_fit_time_limit
+	upper_expl_epoch_bound = kn.expl_epoch + upper_fit_time_limit
 	
 	partial_ATLAS_df = full_ATLAS_df.query('MJDOBS >= %f & MJDOBS <= %f' %(lower_expl_epoch_bound, upper_expl_epoch_bound))
 
 	return partial_ATLAS_df
 	
-def filterAtlasDataFrameByCoords(partial_ATLAS_df, Kilonova):
+# ========================================================================================
+	
+def filterAtlasDataFrameByCoords(partial_ATLAS_df, kn, plot_mode = False):
 
-	ATLAS_chip_halfwidth = 5.4 # degrees
+	ATLAS_chip_halfwidth = 5.46 / 2. # degrees
+	ATLAS_chip_fullwidth = ATLAS_chip_halfwidth * 2.
 	
 	max_allowed_ra = 360.
 	min_allowed_ra = 0.
-# 	max_allowed_dec = 90.
-# 	min_allowed_dec = -90.
 
-	upper_kn_ra_bound = Kilonova.ra + ATLAS_chip_halfwidth
-	lower_kn_ra_bound = Kilonova.ra - ATLAS_chip_halfwidth
-	upper_kn_dec_bound = Kilonova.dec + ATLAS_chip_halfwidth
-	lower_kn_dec_bound = Kilonova.dec - ATLAS_chip_halfwidth
+	upper_kn_ra_bound = kn.ra + (ATLAS_chip_fullwidth * np.cos(kn.dec*np.pi/180.)) / 2.
+	lower_kn_ra_bound = kn.ra - (ATLAS_chip_fullwidth * np.cos(kn.dec*np.pi/180.)) / 2.
+	upper_kn_ra_bound_unc = kn.ra + (ATLAS_chip_fullwidth) / 2.
+	lower_kn_ra_bound_unc = kn.ra - (ATLAS_chip_fullwidth) / 2.
+	upper_kn_dec_bound = kn.dec + ATLAS_chip_halfwidth
+	lower_kn_dec_bound = kn.dec - ATLAS_chip_halfwidth
+	
+	if plot_mode:
+
+		SMALL_SIZE = 15
+		MEDIUM_SIZE = 20
+		BIGGER_SIZE = 25
+
+		plt.rc('font', size=SMALL_SIZE)          	# controls default text sizes
+		plt.rc('axes', titlesize=BIGGER_SIZE)     	# fontsize of the axes title
+		plt.rc('axes', labelsize=MEDIUM_SIZE)    	# fontsize of the x and y labels
+		plt.rc('xtick', labelsize=SMALL_SIZE)    	# fontsize of the tick labels
+		plt.rc('ytick', labelsize=SMALL_SIZE)    	# fontsize of the tick labels
+		plt.rc('legend', fontsize=MEDIUM_SIZE)    	# legend fontsize
+		plt.rc('figure', titlesize=BIGGER_SIZE)  	# fontsize of the figure title
+
+		plt.rcParams["font.family"] = "serif"
+		plt.rcParams['mathtext.fontset'] = 'dejavuserif'
+	
+		fig = plt.figure(figsize = (12, 10))
+		ax = fig.add_subplot(111)
+	
+		ra_array = np.array([lower_kn_ra_bound, upper_kn_ra_bound, upper_kn_ra_bound, lower_kn_ra_bound, lower_kn_ra_bound])
+		ra_array_unc = np.array([lower_kn_ra_bound_unc, upper_kn_ra_bound_unc, upper_kn_ra_bound_unc, lower_kn_ra_bound_unc, lower_kn_ra_bound_unc])
+		dec_array = np.array([lower_kn_dec_bound, lower_kn_dec_bound, upper_kn_dec_bound, upper_kn_dec_bound, lower_kn_dec_bound])
+	
+		ax.plot(kn.ra, kn.dec, ls = 'None', marker = 'o', mfc = 'red', mec = 'black', ms = 10)
+		ax.plot(ra_array_unc, dec_array, ls = '--', marker = 'None', color = 'red', label = 'normal')
+		ax.plot(ra_array, dec_array, ls = '--', marker = 'None', color = 'blue', label = 'corrected')
+	
+		plt.xlabel('RA, degrees')
+		plt.ylabel('Dec, degrees')
+		plt.legend(loc = 'upper center', frameon = False, ncol = 2, bbox_to_anchor = (0.50, 1.15))
+		plt.show(fig)
 	
 	# Filter RA first as it wraps (360 --> 0 degrees)
 	if upper_kn_ra_bound > max_allowed_ra:
 	
-		partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f | RA <= %f' %(lower_kn_ra_bound, upper_kn_ra_bound - max_allowed_ra))
+		partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f | RA <= %f' %(lower_kn_ra_bound, (upper_kn_ra_bound - max_allowed_ra)) )
 	
 	elif lower_kn_ra_bound < min_allowed_ra:
 	
-		partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f | RA <= %f' %(lower_kn_ra_bound + max_allowed_ra, upper_kn_ra_bound - max_allowed_ra))
+		partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f | RA <= %f' %((lower_kn_ra_bound + max_allowed_ra), (upper_kn_ra_bound - max_allowed_ra)) )
 	
 	else:
 
-		partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f & RA <= %f' %(lower_kn_ra_bound, upper_kn_ra_bound))
+		partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f & RA <= %f' %(lower_kn_ra_bound, upper_kn_ra_bound) )
 	
 	# Now filter by DEC
-	partial_ATLAS_df = partial_ATLAS_df.query('DEC >= %f & DEC <= %f' %(lower_kn_dec_bound, upper_kn_dec_bound))
+	partial_ATLAS_df = partial_ATLAS_df.query('DEC >= %f & DEC <= %f' %(lower_kn_dec_bound, upper_kn_dec_bound) )
 	
 # 	partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f & RA <= %f & DEC >= %f & DEC <= %f' %(lower_kn_ra_bound, upper_kn_ra_bound, lower_kn_dec_bound, upper_kn_dec_bound))
 
