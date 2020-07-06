@@ -5,10 +5,10 @@ lower_declination_limit: -40.0
 upper_declination_limit: 80.0
 
 lower_redshift_limit: 0.000
-upper_redshift_limit: 0.015
+upper_redshift_limit: 0.014
 num_redshift_bins: 5
 
-sample_size: 5
+sample_size: 50
 
 ATLAS_data_file: 'QC/QC_all_data_kws_57308_59024_20200624_merged_daves_moving_object_database_data.dat'
 
@@ -18,7 +18,8 @@ upper_fit_time_limit: 11.5
 polynomial_degree: 7
 
 do_extinction: True
-plot_mode: True
+plot_mode: False
+save_results: True
 
 
 

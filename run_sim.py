@@ -2,6 +2,8 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
+from datetime import datetime
 
 import common_tools as ct
 import data_generator as dg
@@ -25,7 +27,8 @@ def main():
 	upper_fit_time_limit,
 	polynomial_degree,
 	do_extinction,
-	plot_mode) = ct.readSurveyParameters()
+	plot_mode,
+	save_results) = ct.readSurveyParameters()
 	
 	kilonova_df = pd.read_csv(kilonova_data_file)
 	p_c, p_o = sv.fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode)
@@ -33,6 +36,14 @@ def main():
 # 	sys.exit()
 	
 	full_ATLAS_df = pd.read_csv(ATLAS_data_file, sep = '\s+')
+	
+	if save_results:
+	
+		if not os.path.exists('results'):
+			os.mkdir('results')
+		
+		filewrite = open('results/results_%s.csv' %datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'a')
+		filewrite.write('number,redshift,ra,dec,expl_epoch,detected\n')
 	
 	shell_weights, redshift_distribution = dg.getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins)
 
@@ -50,6 +61,7 @@ def main():
 	
 		if partial_ATLAS_df.empty:
 			print('\nNo footprints temporally coincident with kilonova.')
+			kn.saveKilonova(filewrite, i)
 			continue
 	
 		partial_ATLAS_df = dg.filterAtlasDataFrameByCoords(partial_ATLAS_df, kn, plot_mode)
@@ -57,12 +69,22 @@ def main():
 
 		if partial_ATLAS_df.empty:
 			print('\nNo footprints at location of kilonova.')
+			kn.saveKilonova(filewrite, i)
 			continue
 
 		kn.generateLightcurve(p_c, p_o, partial_ATLAS_df, do_extinction)
 # 		kn.showLightcurve()
 	
-		sv.recoverDetections(kn, partial_ATLAS_df, plot_mode)
+		recovered_df = sv.recoverDetections(kn, partial_ATLAS_df, plot_mode)
+		
+		count_df = sv.countDetections(recovered_df)
+		
+		kn.setDetectionStatus(count_df)
+# 		print(kn.detected)
+
+		kn.saveKilonova(filewrite, i)
+		
+	filewrite.close()		
 	
 	return None
 

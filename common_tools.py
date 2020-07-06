@@ -21,7 +21,7 @@ def abs2app(abs_mag, redshift):
 
 class Kilonova():
 
-	def __init__(self, redshift = None, ra = None, dec = None, expl_epoch = None, timeline_c = None, timeline_o = None, mag_c = None, mag_o = None):
+	def __init__(self, redshift = None, ra = None, dec = None, expl_epoch = None, timeline_c = None, timeline_o = None, mag_c = None, mag_o = None, detected = False):
 		
 		self.redshift = redshift
 		self.ra = ra
@@ -31,6 +31,7 @@ class Kilonova():
 		self.timeline_o = timeline_o
 		self.mag_c = mag_c
 		self.mag_o = mag_o
+		self.detected = detected
 	
 	def setExplosionEpoch(self, survey_begin, survey_end):
 
@@ -90,6 +91,15 @@ class Kilonova():
 		self.mag_c = mag_c + A_c
 		self.mag_o = mag_o + A_o
 		
+	def setDetectionStatus(self, count_df):
+	
+		if (count_df['detection_count'] >= 3).any():
+			self.detected = True
+
+	def saveKilonova(self, filewrite, kn_number):
+	
+		filewrite.write('%d,%f,%f,%f,%f,%s\n' %(kn_number, self.redshift, self.ra, self.dec, self.expl_epoch, self.detected))
+	
 	def info(self):
 	
 		print('z   = %f' %self.redshift)
@@ -149,6 +159,7 @@ def readSurveyParameters():
 	polynomial_degree = all_settings['polynomial_degree']
 	do_extinction = all_settings['do_extinction']
 	plot_mode = all_settings['plot_mode']
+	save_results = all_settings['save_results']
 
 
 	survey_parameters = (all_settings,
@@ -166,7 +177,8 @@ def readSurveyParameters():
 							upper_fit_time_limit,
 							polynomial_degree,
 							do_extinction,
-							plot_mode)
+							plot_mode,
+							save_results)
 
 	return survey_parameters
 
