@@ -31,7 +31,7 @@ def main():
 	save_results) = ct.readSurveyParameters()
 	
 	kilonova_df = pd.read_csv(kilonova_data_file)
-	p_c, p_o = sv.fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode)
+	p_c, p_o = dg.fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode)
 	
 # 	sys.exit()
 	
