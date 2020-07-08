@@ -19,7 +19,7 @@ polynomial_degree: 7
 
 do_extinction: True
 plot_mode: False
-save_results: True
+save_results: False
 
 
 

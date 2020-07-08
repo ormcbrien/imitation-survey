@@ -59,19 +59,26 @@ def main():
 	
 		partial_ATLAS_df = dg.filterAtlasDataFrameByExplosionEpoch(full_ATLAS_df, kn, lower_fit_time_limit, upper_fit_time_limit)
 	
-		if partial_ATLAS_df.empty:
+		if partial_ATLAS_df.empty and save_results == False:
 			print('\nNo footprints temporally coincident with kilonova.')
+			continue
+		elif partial_ATLAS_df.empty and save_results == True:
+			print('\nNo footprints temporally coincident with kilonova. Saving results here.')
 			kn.saveKilonova(filewrite, i)
 			continue
-	
+
 		partial_ATLAS_df = dg.filterAtlasDataFrameByCoords(partial_ATLAS_df, kn, plot_mode)
 # 		print(partial_ATLAS_df)
 
-		if partial_ATLAS_df.empty:
+		if partial_ATLAS_df.empty and save_results == False:
 			print('\nNo footprints at location of kilonova.')
+			continue
+		elif partial_ATLAS_df.empty and save_results == True:
+			print('\nNo footprints at location of kilonova. Saving results here.')
 			kn.saveKilonova(filewrite, i)
 			continue
-
+		
+		
 		kn.generateLightcurve(p_c, p_o, partial_ATLAS_df, do_extinction)
 # 		kn.showLightcurve()
 	
@@ -82,9 +89,11 @@ def main():
 		kn.setDetectionStatus(count_df)
 # 		print(kn.detected)
 
-		kn.saveKilonova(filewrite, i)
-		
-	filewrite.close()		
+		if save_results:
+			kn.saveKilonova(filewrite, i)
+	
+	if save_results:	
+		filewrite.close()		
 	
 	return None
 
