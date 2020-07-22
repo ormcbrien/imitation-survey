@@ -1,4 +1,5 @@
 import os
+import shutil
 import random
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,8 +22,9 @@ def abs2app(abs_mag, redshift):
 
 class Kilonova():
 
-	def __init__(self, redshift = None, ra = None, dec = None, expl_epoch = None, timeline_c = None, timeline_o = None, mag_c = None, mag_o = None, detected = False):
+	def __init__(self, iteration = None, redshift = None, ra = None, dec = None, expl_epoch = None, timeline_c = None, timeline_o = None, mag_c = None, mag_o = None, extinction_c = 0.0, extinction_o = 0.0, detected = False, detection_count = 0, reason = 'None'):
 		
+		self.iteration = iteration
 		self.redshift = redshift
 		self.ra = ra
 		self.dec = dec
@@ -31,16 +33,24 @@ class Kilonova():
 		self.timeline_o = timeline_o
 		self.mag_c = mag_c
 		self.mag_o = mag_o
+		self.extinction_c = extinction_c
+		self.extinction_o = extinction_o
 		self.detected = detected
+		self.detection_count = detection_count
+		self.reason = reason
+	
+	def setIterationNumber(self, iteration):
+		
+		self.iteration = iteration
 	
 	def setExplosionEpoch(self, survey_begin, survey_end):
 
 		self.expl_epoch = random.uniform(survey_begin, survey_end)
 		
-	def setCoords(self, lower_declination_limit, upper_declination_limit):
+	def setCoords(self, lower_declination_bound, upper_declination_bound):
 	
 		self.ra = random.uniform(0.0, 360.0)
-		self.dec = random.uniform(lower_declination_limit, upper_declination_limit)
+		self.dec = random.uniform(lower_declination_bound, upper_declination_bound)
 		
 	def setRedshift(self, lower_redshift_bound, upper_redshift_bound):
 	
@@ -90,15 +100,20 @@ class Kilonova():
 		self.timeline_o = phase_o + self.expl_epoch
 		self.mag_c = mag_c + A_c
 		self.mag_o = mag_o + A_o
+		self.extinction_c = A_c
+		self.extinction_o = A_o
 		
 	def setDetectionStatus(self, count_df):
 	
 		if (count_df['detection_count'] >= 3).any():
 			self.detected = True
+		
+		self.detection_count = count_df['detection_count'].sum()
+		
 
-	def saveKilonova(self, filewrite, kn_number):
+	def saveKilonova(self, filewrite, reason):
 	
-		filewrite.write('%d,%f,%f,%f,%f,%s\n' %(kn_number, self.redshift, self.ra, self.dec, self.expl_epoch, self.detected))
+		filewrite.write('%d,%f,%f,%f,%f,%f,%f,%s,%d,%s\n' %(self.iteration, self.redshift, self.ra, self.dec, self.expl_epoch, self.extinction_c, self.extinction_o, self.detected, self.detection_count, reason))
 	
 	def info(self):
 	
@@ -148,6 +163,7 @@ def readSurveyParameters():
 	survey_end = all_settings['survey_end']
 	lower_declination_limit = all_settings['lower_declination_limit']
 	upper_declination_limit = all_settings['upper_declination_limit']
+	declination_band_width = all_settings['declination_band_width']
 	lower_redshift_limit = all_settings['lower_redshift_limit']
 	upper_redshift_limit = all_settings['upper_redshift_limit']
 	num_redshift_bins = all_settings['num_redshift_bins']
@@ -160,6 +176,7 @@ def readSurveyParameters():
 	do_extinction = all_settings['do_extinction']
 	plot_mode = all_settings['plot_mode']
 	save_results = all_settings['save_results']
+	results_directory = all_settings['results_directory']
 
 
 	survey_parameters = (all_settings,
@@ -167,6 +184,7 @@ def readSurveyParameters():
 							survey_end,
 							lower_declination_limit,
 							upper_declination_limit,
+							declination_band_width,
 							lower_redshift_limit,
 							upper_redshift_limit,
 							num_redshift_bins,
@@ -178,9 +196,36 @@ def readSurveyParameters():
 							polynomial_degree,
 							do_extinction,
 							plot_mode,
-							save_results)
+							save_results,
+							results_directory)
 
 	return survey_parameters
+
+# ========================================================================================
+
+def prepareResultsDirectory(save_results, results_directory):
+
+	if not os.path.exists('results'):
+		os.mkdir('results')
+		
+	if save_results:	
+		abs_results_directory = os.path.join(os.getcwd(), 'results', results_directory)
+		shutil.rmtree(abs_results_directory)
+		os.mkdir(abs_results_directory)
+		
+		os.mkdir(os.path.join(abs_results_directory, 'plots'))
+# 		os.mkdir(os.path.join(abs_results_directory, 'weights'))
+		
+		filewrite = open(os.path.join(abs_results_directory, 'population.csv'), 'a')
+		filewrite.write('number,redshift,ra,dec,expl_epoch,extinction_c,extinction_o,detected,detection_count,reason\n')
+		
+		os.system('cp settings.yaml %s' %abs_results_directory)
+		
+		return filewrite
+	
+	else:
+	
+		return None
 
 if __name__ == '__main__':
 	main()

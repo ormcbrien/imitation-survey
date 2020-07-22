@@ -24,7 +24,26 @@ def getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bin
 	return shell_weights, redshift_distribution
 	
 # ========================================================================================
+
+def getBandWeights(lower_declination_limit, upper_declination_limit, declination_band_width):
+
+	declination_distribution = np.arange(lower_declination_limit, upper_declination_limit, declination_band_width)
 	
+	band_midpoints = np.empty(len(declination_distribution) - 1)
+	
+	for i in range(1, len(declination_distribution)):
+	
+		band_midpoints[i-1] = declination_distribution[i-1] + (declination_distribution[i] - declination_distribution[i-1]) / 2.0
+	
+	band_weights = np.cos(band_midpoints * np.pi / 180.)
+	
+# 	for i in range(1, len(declination_distribution)):
+# 		print('Dec = %f to %f has midpoint %f and weight %f' %(declination_distribution[i-1], declination_distribution[i], band_midpoints[i-1], band_weights[i-1]))
+		
+	return band_weights, declination_distribution
+	
+# ========================================================================================
+
 def getRedshiftBounds(shell_weights, redshift_distribution):
 
     weights_sum = shell_weights.sum()
@@ -39,6 +58,23 @@ def getRedshiftBounds(shell_weights, redshift_distribution):
         if x < shell_weights_cumulative_sum[i]:
             
             return redshift_distribution[i], redshift_distribution[i+1]
+
+# ========================================================================================
+
+def getDeclinationBounds(band_weights, declination_distribution):
+
+    weights_sum = band_weights.sum()
+    # standardization:
+    np.multiply(band_weights, 1. / weights_sum, band_weights)
+    band_weights_cumulative_sum = band_weights.cumsum()
+    
+    x = random.random()
+    
+    for i in range(len(band_weights_cumulative_sum)):
+        
+        if x < band_weights_cumulative_sum[i]:
+            
+            return declination_distribution[i], declination_distribution[i+1]
 
 # ========================================================================================
 

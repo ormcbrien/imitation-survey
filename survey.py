@@ -61,7 +61,7 @@ def recoverDetections(kn, partial_ATLAS_df, plot_mode = False):
 	
 # 	print(recovered_cyan_df)
 # 	print(recovered_orange_df)
-	print(recovered_df)
+# 	print(recovered_df)
 
 	return recovered_df
 
@@ -89,7 +89,7 @@ def countDetections(recovered_df):
 
 	count_df = pd.DataFrame({'nights': unique_days, 'detection_count': unique_days_count})
 	count_df = count_df.sort_values(by = 'nights')
-	print(count_df)
+# 	print(count_df)
 	
 	return count_df
 
