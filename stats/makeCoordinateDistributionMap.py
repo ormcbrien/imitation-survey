@@ -16,7 +16,7 @@ MEDIUM_SIZE = 20
 BIGGER_SIZE = 25
 
 fig = plt.figure(figsize = (12, 10))
-ax = fig.add_subplot(111, projection = 'mollweide')
+ax = fig.add_subplot(111, projection = 'aitoff')
 ax.grid(True)
 
 plt.rc('font', size=SMALL_SIZE)          	# controls default text sizes
@@ -34,7 +34,7 @@ plt.rcParams['mathtext.fontset'] = 'dejavuserif'
 Plot meta-data end
 """
 
-results_file = 'results_2020-07-06_14-56-21.csv'
+results_file = '../results/results_2020-07-22_13-25-37.csv'
 results_df = pd.read_csv(results_file)
 
 ra = results_df['ra']

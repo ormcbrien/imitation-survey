@@ -18,7 +18,7 @@ SMALL_SIZE = 15
 MEDIUM_SIZE = 20
 BIGGER_SIZE = 25
 
-plt.figure(figsize = (12,10))
+plt.figure(figsize = (20,10))
 
 plt.rc('font', size=SMALL_SIZE)          	# controls default text sizes
 plt.rc('axes', titlesize=BIGGER_SIZE)     	# fontsize of the axes title
@@ -36,15 +36,25 @@ plt.rcParams['mathtext.fontset'] = 'dejavuserif'
 Plot meta-data end
 """
 
-results_file = 'results_2020-07-06_14-56-21.csv'
+results_file = '../results/results_2020-07-22_13-25-37.csv'
 results_df = pd.read_csv(results_file)
 
 # print(results_df)
 
-plt.hist(results_df['redshift'], bins = num_bins, color = 'blue', edgecolor = 'black', alpha = 0.75)
+bin_edges = np.linspace(lower_redshift_limit, upper_redshift_limit, num_bins + 1)
+
+# for i, bin_edge in enumerate(bin_edges):
+# 	bin_edges[i] = np.format_float_positional(bin_edge, precision = 3)
+# 
+# print(bin_edges)
+
+plt.hist(results_df['redshift'], bins = bin_edges, color = 'blue', edgecolor = 'black', alpha = 0.75, align = 'mid')
+plt.xticks(bin_edges, rotation = 45.)
+
+plt.xlim([lower_redshift_limit, upper_redshift_limit])
 
 plt.xlabel('Redshift, $z$')
-plt.ylabel('Frequency')
+plt.ylabel('Number of kilonovae')
 
 plt.show()
 
