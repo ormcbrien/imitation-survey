@@ -9,6 +9,7 @@ from progress.bar import Bar
 import common_tools as ct
 import data_generator as dg
 import survey as sv
+import output_plots as op
 from common_tools import Kilonova
 
 def main():
@@ -96,11 +97,16 @@ def main():
 			kn.saveKilonova(filewrite, reason = 'Insufficient detections')
 		
 		bar.next()
+
+	bar.finish()
 	
 	if save_results:	
 		filewrite.close()		
 	
-	bar.finish()
+		op.calculateDetectionEfficiency(results_directory)
+		op.makeRedshiftDistribution(results_directory, lower_redshift_limit, upper_redshift_limit, num_redshift_bins)
+		op.makeCoordinateDistributionMap(results_directory)
+	
 	
 	return None
 

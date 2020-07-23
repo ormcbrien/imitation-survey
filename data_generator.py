@@ -208,9 +208,10 @@ def fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limi
 		plt.xlabel('Phase, days')
 		plt.ylabel('Magnitude')
 		plt.gca().invert_yaxis()
+		plt.tight_layout()
 		
 		if save_results:
-			plt.savefig('results/' + results_directory + 'plots/polynomial_k_%d.pdf' %polynomial_degree)
+			plt.savefig('results/' + results_directory + '/polynomial_k_%d.pdf' %polynomial_degree)
 			plt.close()
 		else:
 			plt.show()
