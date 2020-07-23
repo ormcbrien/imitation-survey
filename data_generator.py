@@ -104,38 +104,38 @@ def filterAtlasDataFrameByCoords(partial_ATLAS_df, kn, plot_mode = False):
 	upper_kn_dec_bound = kn.dec + ATLAS_chip_halfwidth
 	lower_kn_dec_bound = kn.dec - ATLAS_chip_halfwidth
 	
-	if plot_mode:
-
-		SMALL_SIZE = 15
-		MEDIUM_SIZE = 20
-		BIGGER_SIZE = 25
-
-		plt.rc('font', size=SMALL_SIZE)          	# controls default text sizes
-		plt.rc('axes', titlesize=BIGGER_SIZE)     	# fontsize of the axes title
-		plt.rc('axes', labelsize=MEDIUM_SIZE)    	# fontsize of the x and y labels
-		plt.rc('xtick', labelsize=SMALL_SIZE)    	# fontsize of the tick labels
-		plt.rc('ytick', labelsize=SMALL_SIZE)    	# fontsize of the tick labels
-		plt.rc('legend', fontsize=MEDIUM_SIZE)    	# legend fontsize
-		plt.rc('figure', titlesize=BIGGER_SIZE)  	# fontsize of the figure title
-
-		plt.rcParams["font.family"] = "serif"
-		plt.rcParams['mathtext.fontset'] = 'dejavuserif'
-	
-		fig = plt.figure(figsize = (12, 10))
-		ax = fig.add_subplot(111)
-	
-		ra_array = np.array([lower_kn_ra_bound, upper_kn_ra_bound, upper_kn_ra_bound, lower_kn_ra_bound, lower_kn_ra_bound])
-		ra_array_unc = np.array([lower_kn_ra_bound_unc, upper_kn_ra_bound_unc, upper_kn_ra_bound_unc, lower_kn_ra_bound_unc, lower_kn_ra_bound_unc])
-		dec_array = np.array([lower_kn_dec_bound, lower_kn_dec_bound, upper_kn_dec_bound, upper_kn_dec_bound, lower_kn_dec_bound])
-	
-		ax.plot(kn.ra, kn.dec, ls = 'None', marker = 'o', mfc = 'red', mec = 'black', ms = 10)
-		ax.plot(ra_array_unc, dec_array, ls = '--', marker = 'None', color = 'red', label = 'normal')
-		ax.plot(ra_array, dec_array, ls = '--', marker = 'None', color = 'blue', label = 'corrected')
-	
-		plt.xlabel('RA, degrees')
-		plt.ylabel('Dec, degrees')
-		plt.legend(loc = 'upper center', frameon = False, ncol = 2, bbox_to_anchor = (0.50, 1.15))
-		plt.show(fig)
+# 	if plot_mode:
+# 
+# 		SMALL_SIZE = 15
+# 		MEDIUM_SIZE = 20
+# 		BIGGER_SIZE = 25
+# 
+# 		plt.rc('font', size=SMALL_SIZE)          	# controls default text sizes
+# 		plt.rc('axes', titlesize=BIGGER_SIZE)     	# fontsize of the axes title
+# 		plt.rc('axes', labelsize=MEDIUM_SIZE)    	# fontsize of the x and y labels
+# 		plt.rc('xtick', labelsize=SMALL_SIZE)    	# fontsize of the tick labels
+# 		plt.rc('ytick', labelsize=SMALL_SIZE)    	# fontsize of the tick labels
+# 		plt.rc('legend', fontsize=MEDIUM_SIZE)    	# legend fontsize
+# 		plt.rc('figure', titlesize=BIGGER_SIZE)  	# fontsize of the figure title
+# 
+# 		plt.rcParams["font.family"] = "serif"
+# 		plt.rcParams['mathtext.fontset'] = 'dejavuserif'
+# 	
+# 		fig = plt.figure(figsize = (12, 10))
+# 		ax = fig.add_subplot(111)
+# 	
+# 		ra_array = np.array([lower_kn_ra_bound, upper_kn_ra_bound, upper_kn_ra_bound, lower_kn_ra_bound, lower_kn_ra_bound])
+# 		ra_array_unc = np.array([lower_kn_ra_bound_unc, upper_kn_ra_bound_unc, upper_kn_ra_bound_unc, lower_kn_ra_bound_unc, lower_kn_ra_bound_unc])
+# 		dec_array = np.array([lower_kn_dec_bound, lower_kn_dec_bound, upper_kn_dec_bound, upper_kn_dec_bound, lower_kn_dec_bound])
+# 	
+# 		ax.plot(kn.ra, kn.dec, ls = 'None', marker = 'o', mfc = 'red', mec = 'black', ms = 10)
+# 		ax.plot(ra_array_unc, dec_array, ls = '--', marker = 'None', color = 'red', label = 'normal')
+# 		ax.plot(ra_array, dec_array, ls = '--', marker = 'None', color = 'blue', label = 'corrected')
+# 	
+# 		plt.xlabel('RA, degrees')
+# 		plt.ylabel('Dec, degrees')
+# 		plt.legend(loc = 'upper center', frameon = False, ncol = 2, bbox_to_anchor = (0.50, 1.15))
+# 		plt.show(fig)
 	
 	# Filter RA first as it wraps (360 --> 0 degrees)
 	if upper_kn_ra_bound > max_allowed_ra:
@@ -159,7 +159,7 @@ def filterAtlasDataFrameByCoords(partial_ATLAS_df, kn, plot_mode = False):
 
 # ========================================================================================
 
-def fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode = False):
+def fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode = False, save_results = False, results_directory = 'test'):
 
 	kilonova_df_cyan = kilonova_df.query('c.notnull()', engine = 'python')
 	kilonova_df_orange = kilonova_df.query('o.notnull()', engine = 'python')
@@ -208,8 +208,13 @@ def fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limi
 		plt.xlabel('Phase, days')
 		plt.ylabel('Magnitude')
 		plt.gca().invert_yaxis()
-		plt.savefig('.visualisation/polyfit_k_%d.png' %polynomial_degree)
-		plt.show()
+		
+		if save_results:
+			plt.savefig('results/' + results_directory + 'plots/polynomial_k_%d.pdf' %polynomial_degree)
+			plt.close()
+		else:
+			plt.show()
+			plt.close()
 	
 	return p_c, p_o
 

@@ -208,24 +208,20 @@ def prepareResultsDirectory(save_results, results_directory):
 	if not os.path.exists('results'):
 		os.mkdir('results')
 		
-	if save_results:	
-		abs_results_directory = os.path.join(os.getcwd(), 'results', results_directory)
-		shutil.rmtree(abs_results_directory)
-		os.mkdir(abs_results_directory)
-		
-		os.mkdir(os.path.join(abs_results_directory, 'plots'))
-# 		os.mkdir(os.path.join(abs_results_directory, 'weights'))
-		
-		filewrite = open(os.path.join(abs_results_directory, 'population.csv'), 'a')
-		filewrite.write('number,redshift,ra,dec,expl_epoch,extinction_c,extinction_o,detected,detection_count,reason\n')
-		
-		os.system('cp settings.yaml %s' %abs_results_directory)
-		
-		return filewrite
+	abs_results_directory = os.path.join(os.getcwd(), 'results', results_directory)
+	shutil.rmtree(abs_results_directory)
+	os.mkdir(abs_results_directory)
 	
-	else:
+	os.mkdir(os.path.join(abs_results_directory, 'plots'))
+# 	os.mkdir(os.path.join(abs_results_directory, 'weights'))
 	
-		return None
+	filewrite = open(os.path.join(abs_results_directory, 'population.csv'), 'a')
+	filewrite.write('number,redshift,ra,dec,expl_epoch,extinction_c,extinction_o,detected,detection_count,reason\n')
+	
+	os.system('cp settings.yaml %s' %abs_results_directory)
+	
+	return filewrite
+	
 
 if __name__ == '__main__':
 	main()

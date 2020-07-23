@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def recoverDetections(kn, partial_ATLAS_df, plot_mode = False):
+def recoverDetections(kn, partial_ATLAS_df, plot_mode = False, save_results = False, results_directory = 'test'):
 	
 	cyan_partial_ATLAS_df = partial_ATLAS_df.query('FILTER == "c"')
 	orange_partial_ATLAS_df = partial_ATLAS_df.query('FILTER == "o"')
@@ -50,9 +50,36 @@ def recoverDetections(kn, partial_ATLAS_df, plot_mode = False):
 	
 		plt.xlabel('MJD')
 		plt.ylabel('Magnitude')
-		plt.title('MJD %f, $z = %f$' %(kn.expl_epoch, kn.redshift))
+		plt.title('Kilonova %d - MJD %f, $z = %f$' %(kn.iteration, kn.expl_epoch, kn.redshift))
 		plt.gca().invert_yaxis()
-		plt.show()
+		
+		if save_results:
+			
+			if kn.iteration >= 0 and kn.iteration < 10:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_00000%d.pdf' %kn.iteration)
+				plt.close()
+			elif kn.iteration >= 10 and kn.iteration < 100:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_0000%d.pdf' %kn.iteration)
+				plt.close()
+			elif kn.iteration >= 100 and kn.iteration < 1000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_000%d.pdf' %kn.iteration)
+				plt.close()
+			elif kn.iteration >= 1000 and kn.iteration < 10000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_000%d.pdf' %kn.iteration)
+				plt.close()
+			elif kn.iteration >= 10000 and kn.iteration < 100000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_00%d.pdf' %kn.iteration)
+				plt.close()
+			elif kn.iteration >= 100000 and kn.iteration < 1000000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_0%d.pdf' %kn.iteration)
+				plt.close()
+			elif kn.iteration >= 1000000 and kn.iteration < 10000000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_%d.pdf' %kn.iteration)
+				plt.close()
+
+		else:
+			plt.show()
+			plt.close()
 
 	recovered_cyan_df = pd.DataFrame({'recovered_timeline': recovered_timeline_cyan, 'recovered_mag': recovered_mag_cyan, 'recovered_filter': np.full_like(recovered_mag_cyan, 'c', dtype = str)})
 	recovered_orange_df = pd.DataFrame({'recovered_timeline': recovered_timeline_orange, 'recovered_mag': recovered_mag_orange, 'recovered_filter': np.full_like(recovered_mag_orange, 'o', dtype = str)})

@@ -33,21 +33,17 @@ def main():
 	save_results,
 	results_directory) = ct.readSurveyParameters()
 	
-	kilonova_df = pd.read_csv(kilonova_data_file)
-	p_c, p_o = dg.fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode)
+	if save_results:
+		filewrite = ct.prepareResultsDirectory(save_results, results_directory)
 	
-# 	sys.exit()
+	kilonova_df = pd.read_csv(kilonova_data_file)
+	p_c, p_o = dg.fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode, save_results, results_directory)
 	
 	full_ATLAS_df = pd.read_csv(ATLAS_data_file, sep = '\s+')
 	
 	shell_weights, redshift_distribution = dg.getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins)
-	
 	band_weights, declination_distribution = dg.getBandWeights(lower_declination_limit, upper_declination_limit, declination_band_width)
-
-# 	sys.exit()
-
-	filewrite = ct.prepareResultsDirectory(save_results, results_directory)
-
+	
 	bar = Bar('Running simulation', max = sample_size)
 
 	for i in range(0, sample_size):
@@ -67,10 +63,9 @@ def main():
 		partial_ATLAS_df = dg.filterAtlasDataFrameByExplosionEpoch(full_ATLAS_df, kn, lower_fit_time_limit, upper_fit_time_limit)
 	
 		if partial_ATLAS_df.empty and save_results == False:
-# 			print('\nNo footprints temporally coincident with kilonova.')
+			bar.next()
 			continue
 		elif partial_ATLAS_df.empty and save_results == True:
-# 			print('\nNo footprints temporally coincident with kilonova. Saving results here.')
 			kn.saveKilonova(filewrite, reason = 'No temporal coincidence')
 			bar.next()
 			continue
@@ -79,25 +74,21 @@ def main():
 # 		print(partial_ATLAS_df)
 
 		if partial_ATLAS_df.empty and save_results == False:
-# 			print('\nNo footprints at location of kilonova.')
+			bar.next()
 			continue
 		elif partial_ATLAS_df.empty and save_results == True:
-# 			print('\nNo footprints at location of kilonova. Saving results here.')
 			kn.saveKilonova(filewrite, reason = 'No spatial coincidence')
 			bar.next()
 			continue
 		
-		
 		kn.generateLightcurve(p_c, p_o, partial_ATLAS_df, do_extinction)
 # 		kn.showLightcurve()
 	
-		recovered_df = sv.recoverDetections(kn, partial_ATLAS_df, plot_mode)
+		recovered_df = sv.recoverDetections(kn, partial_ATLAS_df, plot_mode, save_results, results_directory)
 		
 		count_df = sv.countDetections(recovered_df)
-# 		print(count_df)
 		
 		kn.setDetectionStatus(count_df)
-# 		print(kn.detected)
 
 		if save_results and kn.detected:
 			kn.saveKilonova(filewrite, reason = 'Detected')
