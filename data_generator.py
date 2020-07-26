@@ -199,10 +199,10 @@ def fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limi
 		plt.errorbar(phase_c, c_lc, c_err, ls = 'None', marker = 'o', ms = 8, mfc = 'cyan', mec = 'black', ecolor = 'black', capsize = 5)
 		plt.errorbar(phase_o, o_lc, o_err, ls = 'None', marker = 'o', ms = 8, mfc = 'orange', mec = 'black', ecolor = 'black', capsize = 5)
 	
-		time_array = np.linspace(lower_fit_time_limit, upper_fit_time_limit, 40)
+		time_array = np.arange(lower_fit_time_limit, upper_fit_time_limit, 0.1)
 	
-		plt.plot(time_array, p_c(time_array), ls = '-', color = 'green')
-		plt.plot(time_array, p_o(time_array), ls = '-', color = 'red')
+		plt.plot(time_array, p_c(time_array), ls = '-', color = 'green', marker = '|', mfc = 'green', mec = 'green', ms = 10)
+		plt.plot(time_array, p_o(time_array), ls = '-', color = 'red', marker = '|', mfc = 'red', mec = 'red', ms = 10)
 
 		plt.title('Polynomial fit, $k = %d$' %polynomial_degree)
 		plt.xlabel('Phase, days')

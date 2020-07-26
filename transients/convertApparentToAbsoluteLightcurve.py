@@ -3,7 +3,7 @@ import numpy as np
 
 def app2abs(mag, filter):
 
-	d = 40.
+	d = 131.4
 	
 	A_g = 0.407
 	A_r = 0.282
@@ -22,16 +22,16 @@ def app2abs(mag, filter):
 	
 	return mag - 5*np.log10(d) - 25 - A
 
-df = pd.read_csv('app_AT2017gfo.csv')
+df = pd.read_csv('SN2019ata_clean.csv')
 print(df)
 
 df_out = pd.DataFrame({'phase': df['phase'],
-					   'g': app2abs(df['g'], 'g'), 
-					   'gerr': df['gerr'], 
-					   'r': app2abs(df['r'], 'r'), 
-					   'rerr': df['rerr'], 
-					   'i': app2abs(df['i'], 'i'), 
-					   'ierr': df['ierr'], 
+# 					   'g': app2abs(df['g'], 'g'), 
+# 					   'gerr': df['gerr'], 
+# 					   'r': app2abs(df['r'], 'r'), 
+# 					   'rerr': df['rerr'], 
+# 					   'i': app2abs(df['i'], 'i'), 
+# 					   'ierr': df['ierr'], 
 					   'c': app2abs(df['c'], 'c'), 
 					   'cerr': df['cerr'], 
 					   'o': app2abs(df['o'], 'o'), 
@@ -39,4 +39,4 @@ df_out = pd.DataFrame({'phase': df['phase'],
 
 print(df_out)
 
-df_out.to_csv('abs_AT2017gfo.csv', index = False)
+df_out.to_csv('abs_SN2019ata.csv', index = False)

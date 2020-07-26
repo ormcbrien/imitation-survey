@@ -22,7 +22,7 @@ def abs2app(abs_mag, redshift):
 
 class Kilonova():
 
-	def __init__(self, iteration = None, redshift = None, ra = None, dec = None, expl_epoch = None, timeline_c = None, timeline_o = None, mag_c = None, mag_o = None, extinction_c = 0.0, extinction_o = 0.0, detected = False, detection_count = 0, reason = 'None'):
+	def __init__(self, iteration = None, redshift = None, ra = None, dec = None, expl_epoch = None, timeline_c = None, timeline_o = None, mag_c = None, mag_o = None, extinction_c = -99.9999, extinction_o = -99.9999, detected = False, detection_count = 0, reason = 'None'):
 		
 		self.iteration = iteration
 		self.redshift = redshift
@@ -113,7 +113,7 @@ class Kilonova():
 
 	def saveKilonova(self, filewrite, reason):
 	
-		filewrite.write('%d,%f,%f,%f,%f,%f,%f,%s,%d,%s\n' %(self.iteration, self.redshift, self.ra, self.dec, self.expl_epoch, self.extinction_c, self.extinction_o, self.detected, self.detection_count, reason))
+		filewrite.write('%d,%.6f,%.6f,%.6f,%.5f,%.4f,%.4f,%s,%d,%s\n' %(self.iteration, self.redshift, self.ra, self.dec, self.expl_epoch, self.extinction_c, self.extinction_o, self.detected, self.detection_count, reason))
 	
 	def info(self):
 	
@@ -209,8 +209,12 @@ def prepareResultsDirectory(save_results, results_directory):
 		os.mkdir('results')
 		
 	abs_results_directory = os.path.join(os.getcwd(), 'results', results_directory)
-	shutil.rmtree(abs_results_directory)
-	os.mkdir(abs_results_directory)
+	
+	if os.path.exists(abs_results_directory):
+		shutil.rmtree(abs_results_directory)
+		os.mkdir(abs_results_directory)
+	else:
+		os.mkdir(abs_results_directory)
 	
 	os.mkdir(os.path.join(abs_results_directory, 'plots'))
 # 	os.mkdir(os.path.join(abs_results_directory, 'weights'))

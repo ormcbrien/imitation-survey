@@ -103,9 +103,10 @@ def main():
 	if save_results:	
 		filewrite.close()		
 	
-		op.calculateDetectionEfficiency(results_directory)
-		op.makeRedshiftDistribution(results_directory, lower_redshift_limit, upper_redshift_limit, num_redshift_bins)
-		op.makeCoordinateDistributionMap(results_directory)
+		op.calculateDetectionEfficiency(all_settings)
+		op.makeRedshiftDistribution(all_settings)
+		op.makeCoordinateDistributionMap(all_settings)
+		op.showSurveyTimeline(all_settings, full_ATLAS_df)
 	
 	
 	return None
