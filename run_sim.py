@@ -10,7 +10,7 @@ import common_tools as ct
 import data_generator as dg
 import survey as sv
 import output_plots as op
-from common_tools import Kilonova
+from common_tools import Transient
 
 def main():
 
@@ -24,8 +24,10 @@ def main():
 	upper_redshift_limit,
 	num_redshift_bins,
 	sample_size,
-	ATLAS_data_file,
-	kilonova_data_file,
+	QC_file,
+	QC_columns,
+	chipwidth,
+	transient_data_file,
 	lower_fit_time_limit,
 	upper_fit_time_limit,
 	polynomial_degree,
@@ -37,10 +39,10 @@ def main():
 	if save_results:
 		filewrite = ct.prepareResultsDirectory(save_results, results_directory)
 	
-	kilonova_df = pd.read_csv(kilonova_data_file)
-	p_c, p_o = dg.fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode, save_results, results_directory)
+	transient_df = pd.read_csv(transient_data_file)
+	p_c, p_o = dg.fitTransientLightcurve(transient_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode, save_results, results_directory)
 	
-	full_ATLAS_df = pd.read_csv(ATLAS_data_file, sep = '\s+')
+	full_QC_df = pd.read_csv(QC_file, sep = '\s+', usecols = QC_columns.values())
 	
 	shell_weights, redshift_distribution = dg.getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins)
 	band_weights, declination_distribution = dg.getBandWeights(lower_declination_limit, upper_declination_limit, declination_band_width)
@@ -48,53 +50,49 @@ def main():
 	bar = Bar('Running simulation', max = sample_size)
 
 	for i in range(0, sample_size):
-# 		print('\n### KILONOVA %d' %i)
 	
-		kn = Kilonova()
-		kn.setIterationNumber(i)
-		kn.setExplosionEpoch(survey_begin, survey_end)
+		transient = Transient()
+		transient.setIterationNumber(i)
+		transient.setExplosionEpoch(survey_begin, survey_end)
 		
 		lower_redshift_bound, upper_redshift_bound = dg.getRedshiftBounds(shell_weights, redshift_distribution)
-		kn.setRedshift(lower_redshift_bound, upper_redshift_bound)
+		transient.setRedshift(lower_redshift_bound, upper_redshift_bound)
 		
 		lower_declination_bound, upper_declination_bound = dg.getDeclinationBounds(band_weights, declination_distribution)
-		kn.setCoords(lower_declination_bound, upper_declination_bound)
-# 		kn.info()
+		transient.setCoords(lower_declination_bound, upper_declination_bound)
 	
-		partial_ATLAS_df = dg.filterAtlasDataFrameByExplosionEpoch(full_ATLAS_df, kn, lower_fit_time_limit, upper_fit_time_limit)
+		partial_QC_df = dg.filterQualityControlDataFrameByExplosionEpoch(full_QC_df, QC_columns, transient, lower_fit_time_limit, upper_fit_time_limit)
 	
-		if partial_ATLAS_df.empty and save_results == False:
+		if partial_QC_df.empty and save_results == False:
 			bar.next()
 			continue
-		elif partial_ATLAS_df.empty and save_results == True:
-			kn.saveKilonova(filewrite, reason = 'No temporal coincidence')
+		elif partial_QC_df.empty and save_results == True:
+			transient.saveTransient(filewrite, reason = 'No temporal coincidence')
 			bar.next()
 			continue
 
-		partial_ATLAS_df = dg.filterAtlasDataFrameByCoords(partial_ATLAS_df, kn, plot_mode)
-# 		print(partial_ATLAS_df)
+		partial_QC_df = dg.filterQualityControlDataFrameByCoords(partial_QC_df, QC_columns, transient, chipwidth, plot_mode)
 
-		if partial_ATLAS_df.empty and save_results == False:
+		if partial_QC_df.empty and save_results == False:
 			bar.next()
 			continue
-		elif partial_ATLAS_df.empty and save_results == True:
-			kn.saveKilonova(filewrite, reason = 'No spatial coincidence')
+		elif partial_QC_df.empty and save_results == True:
+			transient.saveTransient(filewrite, reason = 'No spatial coincidence')
 			bar.next()
 			continue
 		
-		kn.generateLightcurve(p_c, p_o, partial_ATLAS_df, do_extinction)
-# 		kn.showLightcurve()
+		transient.generateLightcurve(p_c, p_o, partial_QC_df, QC_columns, do_extinction)
 	
-		recovered_df = sv.recoverDetections(kn, partial_ATLAS_df, plot_mode, save_results, results_directory)
+		recovered_df = sv.recoverDetections(transient, partial_QC_df, QC_columns, plot_mode, save_results, results_directory)
 		
 		count_df = sv.countDetections(recovered_df)
 		
-		kn.setDetectionStatus(count_df)
+		transient.setDetectionStatus(count_df)
 
-		if save_results and kn.detected:
-			kn.saveKilonova(filewrite, reason = 'Detected')
-		elif save_results and not kn.detected:
-			kn.saveKilonova(filewrite, reason = 'Insufficient detections')
+		if save_results and transient.detected:
+			transient.saveTransient(filewrite, reason = 'Detected')
+		elif save_results and not transient.detected:
+			transient.saveTransient(filewrite, reason = 'Insufficient detections')
 		
 		bar.next()
 
@@ -106,7 +104,7 @@ def main():
 		op.calculateDetectionEfficiency(all_settings)
 		op.makeRedshiftDistribution(all_settings)
 		op.makeCoordinateDistributionMap(all_settings)
-		op.showSurveyTimeline(all_settings, full_ATLAS_df)
+		op.showSurveyTimeline(all_settings, full_QC_df, QC_columns)
 	
 	
 	return None

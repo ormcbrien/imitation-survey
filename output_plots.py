@@ -66,7 +66,7 @@ def makeRedshiftDistribution(all_settings):
 	plt.xlim([lower_redshift_limit, upper_redshift_limit])
 
 	plt.xlabel('Redshift, $z$')
-	plt.ylabel('Number of kilonovae')
+	plt.ylabel('Number of transients')
 
 	plt.tight_layout()
 	plt.savefig('results/' + results_directory + '/redshiftDistribution.pdf')
@@ -145,7 +145,7 @@ def makeCoordinateDistributionMap(all_settings):
 
 # ========================================================================================
 
-def showSurveyTimeline(all_settings, full_ATLAS_df):
+def showSurveyTimeline(all_settings, full_QC_df, QC_columns):
 	
 	survey_begin = all_settings['survey_begin']
 	survey_end = all_settings['survey_end']
@@ -176,11 +176,11 @@ def showSurveyTimeline(all_settings, full_ATLAS_df):
 	Plot meta-data end
 	"""
 	
-	full_ATLAS_df_cyan = full_ATLAS_df.query('FILTER == "c"')
-	full_ATLAS_df_orange = full_ATLAS_df.query('FILTER == "o"')
+	full_QC_df_cyan = full_QC_df.query('%s == "c"' %QC_columns['qc_filters'])
+	full_QC_df_orange = full_QC_df.query('%s == "o"' %QC_columns['qc_filters'])
 	
-	plt.plot(full_ATLAS_df_cyan['MJDOBS'], full_ATLAS_df_cyan['MAG5SIG'], ls = 'None', marker = 'v', mfc = 'cyan', mec = None, ms = 5, alpha = 0.15)
-	plt.plot(full_ATLAS_df_orange['MJDOBS'], full_ATLAS_df_orange['MAG5SIG'], ls = 'None', marker = 'v', mfc = 'orange', mec = None, ms = 5, alpha = 0.15)
+	plt.plot(full_QC_df_cyan[QC_columns['qc_time']], full_QC_df_cyan[QC_columns['qc_limits']], ls = 'None', marker = 'v', mfc = 'cyan', mec = None, ms = 5, alpha = 0.15)
+	plt.plot(full_QC_df_orange[QC_columns['qc_time']], full_QC_df_orange[QC_columns['qc_limits']], ls = 'None', marker = 'v', mfc = 'orange', mec = None, ms = 5, alpha = 0.15)
 	
 	plt.axvline(survey_begin, ls = '-', color = 'red')
 	plt.axvline(survey_end, ls = '-', color = 'red')

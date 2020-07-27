@@ -2,22 +2,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def recoverDetections(kn, partial_ATLAS_df, plot_mode = False, save_results = False, results_directory = 'test'):
+def recoverDetections(transient, partial_QC_df, QC_columns, plot_mode = False, save_results = False, results_directory = 'test'):
 	
-	cyan_partial_ATLAS_df = partial_ATLAS_df.query('FILTER == "c"')
-	orange_partial_ATLAS_df = partial_ATLAS_df.query('FILTER == "o"')
+	cyan_partial_QC_df = partial_QC_df.query('%s == "c"' %QC_columns['qc_filters'])
+	orange_partial_QC_df = partial_QC_df.query('%s == "o"' %QC_columns['qc_filters'])
 	
-	cyan_overlap = cyan_partial_ATLAS_df['MAG5SIG'].ge(other = kn.mag_c)
-	orange_overlap = orange_partial_ATLAS_df['MAG5SIG'].ge(other = kn.mag_o)
+	cyan_overlap = cyan_partial_QC_df[QC_columns['qc_limits']].ge(other = transient.mag_c)
+	orange_overlap = orange_partial_QC_df[QC_columns['qc_limits']].ge(other = transient.mag_o)
 	
-# 	for alpha, bravo in zip(kn.timeline_c[cyan_overlap], kn.mag_c[cyan_overlap]):
+# 	for alpha, bravo in zip(transient.timeline_c[cyan_overlap], transient.mag_c[cyan_overlap]):
 # 		print(alpha, bravo)
 # 	
-# 	for alpha, bravo in zip(kn.timeline_o[orange_overlap], kn.mag_o[orange_overlap]):
+# 	for alpha, bravo in zip(transient.timeline_o[orange_overlap], transient.mag_o[orange_overlap]):
 # 		print(alpha, bravo)
 
-	recovered_timeline_cyan, recovered_mag_cyan = kn.timeline_c[cyan_overlap], kn.mag_c[cyan_overlap]
-	recovered_timeline_orange, recovered_mag_orange = kn.timeline_o[orange_overlap], kn.mag_o[orange_overlap]
+	recovered_timeline_cyan, recovered_mag_cyan = transient.timeline_c[cyan_overlap], transient.mag_c[cyan_overlap]
+	recovered_timeline_orange, recovered_mag_orange = transient.timeline_o[orange_overlap], transient.mag_o[orange_overlap]
 	
 	
 	if plot_mode:
@@ -39,42 +39,42 @@ def recoverDetections(kn, partial_ATLAS_df, plot_mode = False, save_results = Fa
 		plt.rcParams["font.family"] = "serif"
 		plt.rcParams['mathtext.fontset'] = 'dejavuserif'
 	
-		plt.plot(cyan_partial_ATLAS_df['MJDOBS'], cyan_partial_ATLAS_df['MAG5SIG'], ls = 'None', marker = 'v', mfc = 'cyan', mec = 'black', ms = 8)
-		plt.plot(orange_partial_ATLAS_df['MJDOBS'], orange_partial_ATLAS_df['MAG5SIG'], ls = 'None', marker = 'v', mfc = 'orange', mec = 'black', ms = 8)
+		plt.plot(cyan_partial_QC_df[QC_columns['qc_time']], cyan_partial_QC_df[QC_columns['qc_limits']], ls = 'None', marker = 'v', mfc = 'cyan', mec = 'black', ms = 8)
+		plt.plot(orange_partial_QC_df[QC_columns['qc_time']], orange_partial_QC_df[QC_columns['qc_limits']], ls = 'None', marker = 'v', mfc = 'orange', mec = 'black', ms = 8)
 	
-		plt.plot(kn.timeline_c, kn.mag_c, ls = 'None', marker = 'o', mfc = 'cyan', mec = 'black', ms = 8)
-		plt.plot(kn.timeline_o, kn.mag_o, ls = 'None', marker = 'o', mfc = 'orange', mec = 'black', ms = 8)
+		plt.plot(transient.timeline_c, transient.mag_c, ls = 'None', marker = 'o', mfc = 'cyan', mec = 'black', ms = 8)
+		plt.plot(transient.timeline_o, transient.mag_o, ls = 'None', marker = 'o', mfc = 'orange', mec = 'black', ms = 8)
 	
 		plt.plot(recovered_timeline_cyan, recovered_mag_cyan, ls = 'None', marker = 'o', mfc = 'None', mec = 'green', ms = 12)
 		plt.plot(recovered_timeline_orange, recovered_mag_orange, ls = 'None', marker = 'o', mfc = 'None', mec = 'red', ms = 12)
 	
 		plt.xlabel('MJD')
 		plt.ylabel('Magnitude')
-		plt.title('Kilonova %d - MJD %f, $z = %f$' %(kn.iteration, kn.expl_epoch, kn.redshift))
+		plt.title('Transient %d - MJD %.5f, $z = %.6f$' %(transient.iteration, transient.expl_epoch, transient.redshift))
 		plt.gca().invert_yaxis()
 		
 		if save_results:
 			
-			if kn.iteration >= 0 and kn.iteration < 10:
-				plt.savefig('results/' + results_directory + '/plots/recovered_lc_00000%d.pdf' %kn.iteration)
+			if transient.iteration >= 0 and transient.iteration < 10:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_00000%d.pdf' %transient.iteration)
 				plt.close()
-			elif kn.iteration >= 10 and kn.iteration < 100:
-				plt.savefig('results/' + results_directory + '/plots/recovered_lc_0000%d.pdf' %kn.iteration)
+			elif transient.iteration >= 10 and transient.iteration < 100:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_0000%d.pdf' %transient.iteration)
 				plt.close()
-			elif kn.iteration >= 100 and kn.iteration < 1000:
-				plt.savefig('results/' + results_directory + '/plots/recovered_lc_000%d.pdf' %kn.iteration)
+			elif transient.iteration >= 100 and transient.iteration < 1000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_000%d.pdf' %transient.iteration)
 				plt.close()
-			elif kn.iteration >= 1000 and kn.iteration < 10000:
-				plt.savefig('results/' + results_directory + '/plots/recovered_lc_000%d.pdf' %kn.iteration)
+			elif transient.iteration >= 1000 and transient.iteration < 10000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_000%d.pdf' %transient.iteration)
 				plt.close()
-			elif kn.iteration >= 10000 and kn.iteration < 100000:
-				plt.savefig('results/' + results_directory + '/plots/recovered_lc_00%d.pdf' %kn.iteration)
+			elif transient.iteration >= 10000 and transient.iteration < 100000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_00%d.pdf' %transient.iteration)
 				plt.close()
-			elif kn.iteration >= 100000 and kn.iteration < 1000000:
-				plt.savefig('results/' + results_directory + '/plots/recovered_lc_0%d.pdf' %kn.iteration)
+			elif transient.iteration >= 100000 and transient.iteration < 1000000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_0%d.pdf' %transient.iteration)
 				plt.close()
-			elif kn.iteration >= 1000000 and kn.iteration < 10000000:
-				plt.savefig('results/' + results_directory + '/plots/recovered_lc_%d.pdf' %kn.iteration)
+			elif transient.iteration >= 1000000 and transient.iteration < 10000000:
+				plt.savefig('results/' + results_directory + '/plots/recovered_lc_%d.pdf' %transient.iteration)
 				plt.close()
 
 		else:

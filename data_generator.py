@@ -78,31 +78,31 @@ def getDeclinationBounds(band_weights, declination_distribution):
 
 # ========================================================================================
 
-def filterAtlasDataFrameByExplosionEpoch(full_ATLAS_df, kn, lower_fit_time_limit, upper_fit_time_limit):
+def filterQualityControlDataFrameByExplosionEpoch(full_QC_df, QC_columns, transient, lower_fit_time_limit, upper_fit_time_limit):
 
-	lower_expl_epoch_bound = kn.expl_epoch + lower_fit_time_limit
-	upper_expl_epoch_bound = kn.expl_epoch + upper_fit_time_limit
+	lower_expl_epoch_bound = transient.expl_epoch + lower_fit_time_limit
+	upper_expl_epoch_bound = transient.expl_epoch + upper_fit_time_limit
 	
-	partial_ATLAS_df = full_ATLAS_df.query('MJDOBS >= %f & MJDOBS <= %f' %(lower_expl_epoch_bound, upper_expl_epoch_bound))
+	partial_QC_df = full_QC_df.query('%s >= %f & %s <= %f' %(QC_columns['qc_time'], lower_expl_epoch_bound, QC_columns['qc_time'], upper_expl_epoch_bound))
 
-	return partial_ATLAS_df
+	return partial_QC_df
 	
 # ========================================================================================
 	
-def filterAtlasDataFrameByCoords(partial_ATLAS_df, kn, plot_mode = False):
+def filterQualityControlDataFrameByCoords(partial_QC_df, QC_columns, transient, chipwidth, plot_mode = False):
 
-	ATLAS_chip_halfwidth = 5.46 / 2. # degrees
-	ATLAS_chip_fullwidth = ATLAS_chip_halfwidth * 2.
+	chip_halfwidth = chipwidth / 2. # degrees
+	chipwidth = chip_halfwidth * 2.
 	
 	max_allowed_ra = 360.
 	min_allowed_ra = 0.
 
-	upper_kn_ra_bound = kn.ra + (ATLAS_chip_fullwidth * np.cos(kn.dec*np.pi/180.)) / 2.
-	lower_kn_ra_bound = kn.ra - (ATLAS_chip_fullwidth * np.cos(kn.dec*np.pi/180.)) / 2.
-	upper_kn_ra_bound_unc = kn.ra + (ATLAS_chip_fullwidth) / 2.
-	lower_kn_ra_bound_unc = kn.ra - (ATLAS_chip_fullwidth) / 2.
-	upper_kn_dec_bound = kn.dec + ATLAS_chip_halfwidth
-	lower_kn_dec_bound = kn.dec - ATLAS_chip_halfwidth
+	upper_transient_ra_bound = transient.ra + (chipwidth * np.cos(transient.dec*np.pi/180.)) / 2.
+	lower_transient_ra_bound = transient.ra - (chipwidth * np.cos(transient.dec*np.pi/180.)) / 2.
+	upper_transient_ra_bound_unc = transient.ra + (chipwidth) / 2.
+	lower_transient_ra_bound_unc = transient.ra - (chipwidth) / 2.
+	upper_transient_dec_bound = transient.dec + chip_halfwidth
+	lower_transient_dec_bound = transient.dec - chip_halfwidth
 	
 # 	if plot_mode:
 # 
@@ -124,11 +124,11 @@ def filterAtlasDataFrameByCoords(partial_ATLAS_df, kn, plot_mode = False):
 # 		fig = plt.figure(figsize = (12, 10))
 # 		ax = fig.add_subplot(111)
 # 	
-# 		ra_array = np.array([lower_kn_ra_bound, upper_kn_ra_bound, upper_kn_ra_bound, lower_kn_ra_bound, lower_kn_ra_bound])
-# 		ra_array_unc = np.array([lower_kn_ra_bound_unc, upper_kn_ra_bound_unc, upper_kn_ra_bound_unc, lower_kn_ra_bound_unc, lower_kn_ra_bound_unc])
-# 		dec_array = np.array([lower_kn_dec_bound, lower_kn_dec_bound, upper_kn_dec_bound, upper_kn_dec_bound, lower_kn_dec_bound])
+# 		ra_array = np.array([lower_transient_ra_bound, upper_transient_ra_bound, upper_transient_ra_bound, lower_transient_ra_bound, lower_transient_ra_bound])
+# 		ra_array_unc = np.array([lower_transient_ra_bound_unc, upper_transient_ra_bound_unc, upper_transient_ra_bound_unc, lower_transient_ra_bound_unc, lower_transient_ra_bound_unc])
+# 		dec_array = np.array([lower_transient_dec_bound, lower_transient_dec_bound, upper_transient_dec_bound, upper_transient_dec_bound, lower_transient_dec_bound])
 # 	
-# 		ax.plot(kn.ra, kn.dec, ls = 'None', marker = 'o', mfc = 'red', mec = 'black', ms = 10)
+# 		ax.plot(transient.ra, transient.dec, ls = 'None', marker = 'o', mfc = 'red', mec = 'black', ms = 10)
 # 		ax.plot(ra_array_unc, dec_array, ls = '--', marker = 'None', color = 'red', label = 'normal')
 # 		ax.plot(ra_array, dec_array, ls = '--', marker = 'None', color = 'blue', label = 'corrected')
 # 	
@@ -138,41 +138,41 @@ def filterAtlasDataFrameByCoords(partial_ATLAS_df, kn, plot_mode = False):
 # 		plt.show(fig)
 	
 	# Filter RA first as it wraps (360 --> 0 degrees)
-	if upper_kn_ra_bound > max_allowed_ra:
+	if upper_transient_ra_bound > max_allowed_ra:
 	
-		partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f | RA <= %f' %(lower_kn_ra_bound, (upper_kn_ra_bound - max_allowed_ra)) )
+		partial_QC_df = partial_QC_df.query('%s >= %f | %s <= %f' %(QC_columns['qc_ra'], lower_transient_ra_bound, QC_columns['qc_ra'], (upper_transient_ra_bound - max_allowed_ra)) )
 	
-	elif lower_kn_ra_bound < min_allowed_ra:
+	elif lower_transient_ra_bound < min_allowed_ra:
 	
-		partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f | RA <= %f' %((lower_kn_ra_bound + max_allowed_ra), (upper_kn_ra_bound - max_allowed_ra)) )
+		partial_QC_df = partial_QC_df.query('%s >= %f | %s <= %f' %(QC_columns['qc_ra'], (lower_transient_ra_bound + max_allowed_ra), QC_columns['qc_ra'], (upper_transient_ra_bound - max_allowed_ra)) )
 	
 	else:
 
-		partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f & RA <= %f' %(lower_kn_ra_bound, upper_kn_ra_bound) )
+		partial_QC_df = partial_QC_df.query('%s >= %f & %s <= %f' %(QC_columns['qc_ra'], lower_transient_ra_bound, QC_columns['qc_ra'], upper_transient_ra_bound) )
 	
 	# Now filter by DEC
-	partial_ATLAS_df = partial_ATLAS_df.query('DEC >= %f & DEC <= %f' %(lower_kn_dec_bound, upper_kn_dec_bound) )
+	partial_QC_df = partial_QC_df.query('%s >= %f & %s <= %f' %(QC_columns['qc_dec'], lower_transient_dec_bound, QC_columns['qc_dec'], upper_transient_dec_bound) )
 	
-# 	partial_ATLAS_df = partial_ATLAS_df.query('RA >= %f & RA <= %f & DEC >= %f & DEC <= %f' %(lower_kn_ra_bound, upper_kn_ra_bound, lower_kn_dec_bound, upper_kn_dec_bound))
+# 	partial_QC_df = partial_QC_df.query('RA >= %f & RA <= %f & DEC >= %f & DEC <= %f' %(lower_transient_ra_bound, upper_transient_ra_bound, lower_transient_dec_bound, upper_transient_dec_bound))
 
-	return partial_ATLAS_df
+	return partial_QC_df
 
 # ========================================================================================
 
-def fitKilonovaLightcurve(kilonova_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode = False, save_results = False, results_directory = 'test'):
+def fitTransientLightcurve(transient_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode = False, save_results = False, results_directory = 'test'):
 
-	kilonova_df_cyan = kilonova_df.query('c.notnull()', engine = 'python')
-	kilonova_df_orange = kilonova_df.query('o.notnull()', engine = 'python')
+	transient_df_cyan = transient_df.query('c.notnull()', engine = 'python')
+	transient_df_orange = transient_df.query('o.notnull()', engine = 'python')
 	
-# 	print(kilonova_df_cyan)
-# 	print(kilonova_df_orange)
+# 	print(transient_df_cyan)
+# 	print(transient_df_orange)
 
-	phase_c = kilonova_df_cyan['phase']
-	c_lc = kilonova_df_cyan['c']
-	c_err = kilonova_df_cyan['cerr']
-	phase_o = kilonova_df_orange['phase']
-	o_lc = kilonova_df_orange['o']
-	o_err = kilonova_df_orange['oerr']
+	phase_c = transient_df_cyan['phase']
+	c_lc = transient_df_cyan['c']
+	c_err = transient_df_cyan['cerr']
+	phase_o = transient_df_orange['phase']
+	o_lc = transient_df_orange['o']
+	o_err = transient_df_orange['oerr']
 	
 	p_c = np.poly1d(np.polyfit(phase_c, c_lc, polynomial_degree))
 	p_o = np.poly1d(np.polyfit(phase_o, o_lc, polynomial_degree))

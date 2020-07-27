@@ -20,7 +20,7 @@ def abs2app(abs_mag, redshift):
 	return app_mag
 
 
-class Kilonova():
+class Transient():
 
 	def __init__(self, iteration = None, redshift = None, ra = None, dec = None, expl_epoch = None, timeline_c = None, timeline_o = None, mag_c = None, mag_o = None, extinction_c = -99.9999, extinction_o = -99.9999, detected = False, detection_count = 0, reason = 'None'):
 		
@@ -56,13 +56,13 @@ class Kilonova():
 	
 		self.redshift = random.uniform(lower_redshift_bound, upper_redshift_bound)
 		
-	def generateLightcurve(self, p_c, p_o, partial_ATLAS_df, do_extinction = False):
+	def generateLightcurve(self, p_c, p_o, partial_QC_df, QC_columns, do_extinction = False):
 
-		cyan_partial_ATLAS_df = partial_ATLAS_df.query('FILTER == "c"')
-		orange_partial_ATLAS_df = partial_ATLAS_df.query('FILTER == "o"')
+		cyan_partial_QC_df = partial_QC_df.query('%s == "c"' %QC_columns['qc_filters'])
+		orange_partial_QC_df = partial_QC_df.query('%s == "o"' %QC_columns['qc_filters'])
 
-		phase_c = cyan_partial_ATLAS_df['MJDOBS'] - self.expl_epoch
-		phase_o = orange_partial_ATLAS_df['MJDOBS'] - self.expl_epoch
+		phase_c = cyan_partial_QC_df[QC_columns['qc_time']] - self.expl_epoch
+		phase_o = orange_partial_QC_df[QC_columns['qc_time']] - self.expl_epoch
 	
 		mag_c = abs2app(p_c(phase_c), self.redshift)
 		mag_o = abs2app(p_o(phase_o), self.redshift)
@@ -111,7 +111,7 @@ class Kilonova():
 		self.detection_count = count_df['detection_count'].sum()
 		
 
-	def saveKilonova(self, filewrite, reason):
+	def saveTransient(self, filewrite, reason):
 	
 		filewrite.write('%d,%.6f,%.6f,%.6f,%.5f,%.4f,%.4f,%s,%d,%s\n' %(self.iteration, self.redshift, self.ra, self.dec, self.expl_epoch, self.extinction_c, self.extinction_o, self.detected, self.detection_count, reason))
 	
@@ -168,8 +168,10 @@ def readSurveyParameters():
 	upper_redshift_limit = all_settings['upper_redshift_limit']
 	num_redshift_bins = all_settings['num_redshift_bins']
 	sample_size = all_settings['sample_size']
-	ATLAS_data_file = all_settings['ATLAS_data_file']
-	kilonova_data_file = all_settings['kilonova_data_file']
+	QC_file = all_settings['QC_file']
+	QC_columns = all_settings['QC_columns']
+	chipwidth = all_settings['chipwidth']
+	transient_data_file = all_settings['transient_data_file']
 	lower_fit_time_limit = all_settings['lower_fit_time_limit']
 	upper_fit_time_limit = all_settings['upper_fit_time_limit']
 	polynomial_degree = all_settings['polynomial_degree']
@@ -189,8 +191,10 @@ def readSurveyParameters():
 							upper_redshift_limit,
 							num_redshift_bins,
 							sample_size,
-							ATLAS_data_file,
-							kilonova_data_file,
+							QC_file,
+							QC_columns,
+							chipwidth,
+							transient_data_file,
 							lower_fit_time_limit,
 							upper_fit_time_limit,
 							polynomial_degree,
