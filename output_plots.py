@@ -14,6 +14,8 @@ def calculateDetectionEfficiency(all_settings):
 
 	detected_count['recovery'] = detected_count['frequency'] / detected_count['frequency'].sum()
 	
+	detected_count = detected_count.sort_values(by = 'detected')
+	
 	detected_count.to_csv('results/' + results_directory + '/efficiency.csv', index = False)
 
 # ========================================================================================

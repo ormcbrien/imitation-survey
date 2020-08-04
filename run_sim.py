@@ -34,7 +34,8 @@ def main():
 	do_extinction,
 	plot_mode,
 	save_results,
-	results_directory) = ct.readSurveyParameters()
+	results_directory,
+	flavour_mode) = ct.readSurveyParameters()
 	
 	if save_results:
 		filewrite = ct.prepareResultsDirectory(save_results, results_directory)
@@ -44,10 +45,13 @@ def main():
 	
 	full_QC_df = pd.read_csv(QC_file, sep = '\s+', usecols = QC_columns.values())
 	
-	shell_weights, redshift_distribution = dg.getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins)
+	shell_weights, redshift_distribution = dg.getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins, lower_declination_limit, upper_declination_limit)
 	band_weights, declination_distribution = dg.getBandWeights(lower_declination_limit, upper_declination_limit, declination_band_width)
 	
-	bar = Bar('Running simulation', max = sample_size)
+	if flavour_mode:
+		bar = Bar('%s' %ct.getFlavourText(), max = sample_size)
+	elif not flavour_mode:
+		bar = Bar('Running simulation...', max = sample_size)
 
 	for i in range(0, sample_size):
 	

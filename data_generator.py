@@ -2,25 +2,36 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-def getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins):
+def getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins, lower_declination_limit, upper_declination_limit):
+
+	lower_declination_limit_in_rad_for_integration = np.radians(90. - abs(lower_declination_limit))
+	upper_declination_limit_in_rad_for_integration = np.radians(90. - abs(upper_declination_limit))
+
+	lower_vol_segment = np.pi * (np.cos(lower_declination_limit_in_rad_for_integration) - np.cos(lower_declination_limit_in_rad_for_integration)**3 / 3.)
+	upper_vol_segment = np.pi * (np.cos(upper_declination_limit_in_rad_for_integration) - np.cos(upper_declination_limit_in_rad_for_integration)**3 / 3.)
+	whole_vol_segment = (4. / 3.) * np.pi
+	correction_ratio = (lower_vol_segment + upper_vol_segment) / whole_vol_segment
 
 	num_shells = num_redshift_bins - 1
 	redshift_distribution = np.linspace(lower_redshift_limit, upper_redshift_limit, num_redshift_bins)
 	c = 2.99792458e5 # Speed of light in km/s
 	H_0 = 70.0		 # Hubble constant (km/s/Mpc)
 	
-	volume_distribution = (4./3.) * np.pi * (c * redshift_distribution / H_0)**3	
-	shell_volume_distribution = np.empty(num_shells)
+	upper_redshift_bounds = redshift_distribution[1:]
+	lower_redshift_bounds = redshift_distribution[:-1]
 	
-	for i in range(1, len(volume_distribution)):
+	upper_volume_distribution = (4./3.) * np.pi * (c * upper_redshift_bounds / H_0)**3	
+	lower_volume_distribution = (4./3.) * np.pi * (c * lower_redshift_bounds / H_0)**3	
+	shell_volume_distribution = (upper_volume_distribution - lower_volume_distribution) #* correction_ratio
 	
-		shell_volume_distribution[i-1] = volume_distribution[i] - volume_distribution[i-1]
+# 	shell_weights = shell_volume_distribution / np.nanmax(upper_volume_distribution)
+	shell_weights = shell_volume_distribution / np.sum(shell_volume_distribution)
 	
-	shell_weights = shell_volume_distribution / np.nanmax(volume_distribution)
+# 	for i in range(0, len(upper_redshift_bounds)):
+# 		print('z = %f to %f has weight %f' %(lower_redshift_bounds[i], upper_redshift_bounds[i], shell_weights[i]))
 	
-# 	for i in range(1, len(redshift_distribution)):
-# 		print('z = %f to %f has weight %f' %(redshift_distribution[i-1], redshift_distribution[i], shell_weights[i-1]))
-		
+# 	print(np.sum(shell_weights))
+	
 	return shell_weights, redshift_distribution
 	
 # ========================================================================================

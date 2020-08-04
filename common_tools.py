@@ -179,6 +179,7 @@ def readSurveyParameters():
 	plot_mode = all_settings['plot_mode']
 	save_results = all_settings['save_results']
 	results_directory = all_settings['results_directory']
+	flavour_mode = all_settings['flavour_mode']
 
 
 	survey_parameters = (all_settings,
@@ -201,7 +202,8 @@ def readSurveyParameters():
 							do_extinction,
 							plot_mode,
 							save_results,
-							results_directory)
+							results_directory,
+							flavour_mode)
 
 	return survey_parameters
 
@@ -229,7 +231,47 @@ def prepareResultsDirectory(save_results, results_directory):
 	os.system('cp settings.yaml %s' %abs_results_directory)
 	
 	return filewrite
+
+# ========================================================================================
+
+def getFlavourText():
+
+	flavour_text_options = ["Running simulation...",
+							"So, how's your day going?",
+							"Charging!",
+							"Kumbaya, my lord. Kumbaya!",
+							"Go Ahead. Make my day...",
+							"I want to play a game.",
+							"Taking the red pill...",
+							"Something need doing?",
+							"Work work.",
+							"Stop poking me!",
+							"It's not that easy being green...",
+							"I see dead people...",
+							"Austin 3:16 says I just whipped your ass!",
+							"*The Twilight Zone theme music*",
+							"Running efficiency calculation...",
+							"Your hair looks great today!",
+							"How do you like that silver?",
+							"Praise the Sun!",
+							"A long time ago in a galaxy far, far away...",
+							"Shine on you crazy diamond.",
+							"Choose the form of your destructor.",
+							"Have a nice, cold pint and wait for all this to blow over...",
+							"Crash, bang, whallop - what a video!",
+							"Loading...",
+							"Want anything from the shop?",
+							"Generating lightcurves and recovering detections.",
+							"War. War never changes.",
+							"I'm bored of this. I'm going for a Twix.",
+							"Crunching numbers...",
+							"This flavour text was brought to you by my inability to write a thesis.",
+							"You could fry an egg on my processor right now.",
+							"Leeroy Jenkins!"]
 	
+	chosen_text = random.choice(flavour_text_options)
+	
+	return chosen_text
 
 if __name__ == '__main__':
 	main()
