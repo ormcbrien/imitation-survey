@@ -152,11 +152,11 @@ class Transient():
 
 # ========================================================================================
 
-def readSurveyParameters():
+def readSurveyParameters(path_to_settings = 'settings.yaml'):
 
 	import yaml
 	
-	with open('settings.yaml', 'r') as stream:
+	with open(path_to_settings, 'r') as stream:
 		all_settings = yaml.safe_load(stream)
 	
 	survey_begin = all_settings['survey_begin']

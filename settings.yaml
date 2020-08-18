@@ -1,13 +1,13 @@
-survey_begin: 57377.197060
-#survey_begin: 57800.0
+#survey_begin: 57377.197060
+survey_begin: 57800.0
 survey_end: 59022.61850675
 
 lower_declination_limit: -40.0 #degrees
 upper_declination_limit: 80.0  #degrees
 declination_band_width: 5
 
-lower_redshift_limit: 0.01401
-upper_redshift_limit: 0.01634
+lower_redshift_limit: 0.00000
+upper_redshift_limit: 0.03502
 #10.0 Mpc is z = 0.00233
 #20.0 Mpc is z = 0.00467
 #30.0 Mpc is z = 0.00700
@@ -23,9 +23,14 @@ upper_redshift_limit: 0.01634
 #130.0 Mpc is z = 0.03035
 #140.0 Mpc is z = 0.03269
 #150.0 Mpc is z = 0.03502
-num_redshift_bins: 10
+#160.0 Mpc is z = 0.03736
+#170.0 Mpc is z = 0.03969
+#180.0 Mpc is z = 0.04203
+#190.0 Mpc is z = 0.04436
+#200.0 Mpc is z = 0.04670
+num_redshift_bins: 20
 
-sample_size: 500
+sample_size: 100000
 
 QC_file: 'QC/QC_all_data_kws_57308_59024_20200624_merged_daves_moving_object_database_data.dat'
 QC_columns:
@@ -36,17 +41,17 @@ QC_columns:
     qc_dec: 'DEC'
 chipwidth: 5.46 #degrees
 
-transient_data_file: 'transients/abs_AT2017gfo.csv'
+transient_data_file: 'transients/abs_at2017gfo.csv'
 lower_fit_time_limit: -0.25 #days
 upper_fit_time_limit: 11.5  #days
 polynomial_degree: 7
 
 do_extinction: True
-plot_mode: True
+plot_mode: False
 save_results: True
 flavour_mode: True
 
-results_directory: '500_kn_60to70Mpc'
+results_directory: '1e5_kn_to150Mpc'
 
 
 

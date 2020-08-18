@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
+import time
 from datetime import datetime
 from progress.bar import Bar
 
@@ -13,6 +14,9 @@ import output_plots as op
 from common_tools import Transient
 
 def main():
+
+	# READ SETTINGS FILE
+	begin_time = time.time()
 
 	(all_settings,
 	survey_begin,
@@ -37,16 +41,30 @@ def main():
 	results_directory,
 	flavour_mode) = ct.readSurveyParameters()
 	
+	
 	if save_results:
 		filewrite = ct.prepareResultsDirectory(save_results, results_directory)
 	
-	transient_df = pd.read_csv(transient_data_file)
-	p_c, p_o = dg.fitTransientLightcurve(transient_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode, save_results, results_directory)
+	settings_time = time.time()
 	
+	# FIT TEMPLATE LIGHTCURVE	
+	transient_df = pd.read_csv(transient_data_file)
+	p_c, p_o = dg.fitTransientLightcurve(transient_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, save_results, results_directory)
+	
+	template_time = time.time()
+	
+	# READ QC FILE CONTENTS	
 	full_QC_df = pd.read_csv(QC_file, sep = '\s+', usecols = QC_columns.values())
 	
-	shell_weights, redshift_distribution = dg.getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins, lower_declination_limit, upper_declination_limit)
+	qc_time = time.time()
+	
+	# CALCULATE SHELL AND BAND WEIGHTS
+	shell_weights, redshift_distribution = dg.getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins)
 	band_weights, declination_distribution = dg.getBandWeights(lower_declination_limit, upper_declination_limit, declination_band_width)
+	
+	weights_time = time.time()
+
+	# CREATE PROGRESS BAR AND RUN SIMULATION
 	
 	if flavour_mode:
 		bar = Bar('%s' %ct.getFlavourText(), max = sample_size)
@@ -102,6 +120,16 @@ def main():
 
 	bar.finish()
 	
+	simulation_time = time.time()
+	
+	print('Settings read in %.2f s' %(settings_time - begin_time))
+	print('Template lightcurve fit in %.2f s' %(template_time - settings_time))
+	print('QC file read in %.2f s' %(qc_time - template_time))
+	print('Weights calculated in %.2f s' %(weights_time - qc_time))
+	print('Simulation ran in %.2f s' %(simulation_time - weights_time))
+	
+	# SAVE RESULTS AND MAKE FINAL PLOTS
+	
 	if save_results:	
 		filewrite.close()		
 	
@@ -110,7 +138,10 @@ def main():
 		op.makeCoordinateDistributionMap(all_settings)
 		op.showSurveyTimeline(all_settings, full_QC_df, QC_columns)
 	
-	
+		save_time = time.time()
+		
+		print('Results plots produced in %.2f s' %(save_time - simulation_time))
+		
 	return None
 
 

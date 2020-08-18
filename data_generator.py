@@ -2,15 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-def getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins, lower_declination_limit, upper_declination_limit):
-
-	lower_declination_limit_in_rad_for_integration = np.radians(90. - abs(lower_declination_limit))
-	upper_declination_limit_in_rad_for_integration = np.radians(90. - abs(upper_declination_limit))
-
-	lower_vol_segment = np.pi * (np.cos(lower_declination_limit_in_rad_for_integration) - np.cos(lower_declination_limit_in_rad_for_integration)**3 / 3.)
-	upper_vol_segment = np.pi * (np.cos(upper_declination_limit_in_rad_for_integration) - np.cos(upper_declination_limit_in_rad_for_integration)**3 / 3.)
-	whole_vol_segment = (4. / 3.) * np.pi
-	correction_ratio = (lower_vol_segment + upper_vol_segment) / whole_vol_segment
+def getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bins):
 
 	num_shells = num_redshift_bins - 1
 	redshift_distribution = np.linspace(lower_redshift_limit, upper_redshift_limit, num_redshift_bins)
@@ -22,7 +14,7 @@ def getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bin
 	
 	upper_volume_distribution = (4./3.) * np.pi * (c * upper_redshift_bounds / H_0)**3	
 	lower_volume_distribution = (4./3.) * np.pi * (c * lower_redshift_bounds / H_0)**3	
-	shell_volume_distribution = (upper_volume_distribution - lower_volume_distribution) #* correction_ratio
+	shell_volume_distribution = (upper_volume_distribution - lower_volume_distribution)
 	
 # 	shell_weights = shell_volume_distribution / np.nanmax(upper_volume_distribution)
 	shell_weights = shell_volume_distribution / np.sum(shell_volume_distribution)
@@ -38,7 +30,7 @@ def getShellWeights(lower_redshift_limit, upper_redshift_limit, num_redshift_bin
 
 def getBandWeights(lower_declination_limit, upper_declination_limit, declination_band_width):
 
-	declination_distribution = np.arange(lower_declination_limit, upper_declination_limit, declination_band_width)
+	declination_distribution = np.arange(lower_declination_limit, upper_declination_limit + 1, declination_band_width)
 	
 	band_midpoints = np.empty(len(declination_distribution) - 1)
 	
@@ -170,7 +162,7 @@ def filterQualityControlDataFrameByCoords(partial_QC_df, QC_columns, transient, 
 
 # ========================================================================================
 
-def fitTransientLightcurve(transient_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, plot_mode = False, save_results = False, results_directory = 'test'):
+def fitTransientLightcurve(transient_df, lower_fit_time_limit, upper_fit_time_limit, polynomial_degree, save_results = False, results_directory = 'test'):
 
 	transient_df_cyan = transient_df.query('c.notnull()', engine = 'python')
 	transient_df_orange = transient_df.query('o.notnull()', engine = 'python')
@@ -188,7 +180,7 @@ def fitTransientLightcurve(transient_df, lower_fit_time_limit, upper_fit_time_li
 	p_c = np.poly1d(np.polyfit(phase_c, c_lc, polynomial_degree))
 	p_o = np.poly1d(np.polyfit(phase_o, o_lc, polynomial_degree))
 
-	if plot_mode:
+	if save_results:
 
 		SMALL_SIZE = 15
 		MEDIUM_SIZE = 20
@@ -221,12 +213,8 @@ def fitTransientLightcurve(transient_df, lower_fit_time_limit, upper_fit_time_li
 		plt.gca().invert_yaxis()
 		plt.tight_layout()
 		
-		if save_results:
-			plt.savefig('results/' + results_directory + '/polynomial_k_%d.pdf' %polynomial_degree)
-			plt.close()
-		else:
-			plt.show()
-			plt.close()
+		plt.savefig('results/' + results_directory + '/polynomial_k_%d.pdf' %polynomial_degree)
+		plt.close()
 	
 	return p_c, p_o
 
