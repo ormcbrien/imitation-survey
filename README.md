@@ -1,0 +1,5 @@
+This is the code for the ATLAS efficiency simulation project I undertook towards the end of my PhD.
+
+It currently runs only as an efficiency simulation for ATLAS for a specific transient lightcurve, contrary to the name of the GitHub project. It does not have the proper capacity to work as an imitation survey yet (though this is a long term goal of the code).
+
+The operation of the efficiency simulation is described in the appendix of my thesis. This can be found in 'thesis_plots/' as 'PhD_thesis_OMcBrien_corrected.pdf'. I would also add that chapters 4 and 5 discuss how I applied this code to measure the efficiency of recovery of AT2017gfo- and AT2018kzr-like transients. In this directory, you will also find the source code for my plotting scripts used to make the various figures in these chapters with the exception of any plots relating to the QC data of ATLAS or the CV decline rates project. The QC data cannot be made publicly available and the CV decline rates project is to be added to a separate repository, as it is relatively independent of the efficiency simulation.
